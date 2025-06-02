@@ -1,4 +1,4 @@
-import type {Config} from 'tailwindcss';
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
   darkMode: ['class'],
@@ -12,8 +12,8 @@ const config: Config = {
       },
       keyframes: {
         progress: {
-          '0%': {width: '0%'},
-          '100%': {width: '100%'},
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
         },
       },
       animation: {
@@ -21,6 +21,6 @@ const config: Config = {
       },
     },
   },
-};
+}
 
-export default config;
+export default config

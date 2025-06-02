@@ -1,17 +1,17 @@
-import { Link } from 'react-router';
-import {Image, Money, Pagination} from '@shopify/hydrogen';
-import {urlWithTrackingParams, type RegularSearchReturn} from '~/lib/search';
+import { Link } from 'react-router'
+import { Image, Money, Pagination } from '@shopify/hydrogen'
+import { urlWithTrackingParams, type RegularSearchReturn } from '~/lib/search'
 
-type SearchItems = RegularSearchReturn['result']['items'];
+type SearchItems = RegularSearchReturn['result']['items']
 type PartialSearchResult<ItemType extends keyof SearchItems> = Pick<
   SearchItems,
   ItemType
 > &
-  Pick<RegularSearchReturn, 'term'>;
+  Pick<RegularSearchReturn, 'term'>
 
 type SearchResultsProps = RegularSearchReturn & {
-  children: (args: SearchItems & {term: string}) => React.ReactNode;
-};
+  children: (args: SearchItems & { term: string }) => React.ReactNode
+}
 
 export function SearchResults({
   term,
@@ -19,23 +19,23 @@ export function SearchResults({
   children,
 }: Omit<SearchResultsProps, 'error' | 'type'>) {
   if (!result?.total) {
-    return null;
+    return null
   }
 
-  return children({...result.items, term});
+  return children({ ...result.items, term })
 }
 
-SearchResults.Articles = SearchResultsArticles;
-SearchResults.Pages = SearchResultsPages;
-SearchResults.Products = SearchResultsProducts;
-SearchResults.Empty = SearchResultsEmpty;
+SearchResults.Articles = SearchResultsArticles
+SearchResults.Pages = SearchResultsPages
+SearchResults.Products = SearchResultsProducts
+SearchResults.Empty = SearchResultsEmpty
 
 function SearchResultsArticles({
   term,
   articles,
 }: PartialSearchResult<'articles'>) {
   if (!articles?.nodes.length) {
-    return null;
+    return null
   }
 
   return (
@@ -47,7 +47,7 @@ function SearchResultsArticles({
             baseUrl: `/blogs/${article.handle}`,
             trackingParams: article.trackingParameters,
             term,
-          });
+          })
 
           return (
             <div className="search-results-item" key={article.id}>
@@ -55,17 +55,17 @@ function SearchResultsArticles({
                 {article.title}
               </Link>
             </div>
-          );
+          )
         })}
       </div>
       <br />
     </div>
-  );
+  )
 }
 
-function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
+function SearchResultsPages({ term, pages }: PartialSearchResult<'pages'>) {
   if (!pages?.nodes.length) {
-    return null;
+    return null
   }
 
   return (
@@ -77,7 +77,7 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
             baseUrl: `/pages/${page.handle}`,
             trackingParams: page.trackingParameters,
             term,
-          });
+          })
 
           return (
             <div className="search-results-item" key={page.id}>
@@ -85,12 +85,12 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
                 {page.title}
               </Link>
             </div>
-          );
+          )
         })}
       </div>
       <br />
     </div>
-  );
+  )
 }
 
 function SearchResultsProducts({
@@ -98,46 +98,38 @@ function SearchResultsProducts({
   products,
 }: PartialSearchResult<'products'>) {
   if (!products?.nodes.length) {
-    return null;
+    return null
   }
 
   return (
     <div className="search-result">
       <h2>Products</h2>
       <Pagination connection={products}>
-        {({nodes, isLoading, NextLink, PreviousLink}) => {
+        {({ nodes, isLoading, NextLink, PreviousLink }) => {
           const ItemsMarkup = nodes.map((product) => {
             const productUrl = urlWithTrackingParams({
               baseUrl: `/products/${product.handle}`,
               trackingParams: product.trackingParameters,
               term,
-            });
+            })
 
-            const price = product?.selectedOrFirstAvailableVariant?.price;
-            const image = product?.selectedOrFirstAvailableVariant?.image;
+            const price = product?.selectedOrFirstAvailableVariant?.price
+            const image = product?.selectedOrFirstAvailableVariant?.image
 
             return (
               <div className="search-results-item" key={product.id}>
                 <Link prefetch="intent" to={productUrl}>
                   {image && (
-                    <Image
-                      data={image}
-                      alt={product.title}
-                      width={50}
-                    />
+                    <Image data={image} alt={product.title} width={50} />
                   )}
                   <div>
                     <p>{product.title}</p>
-                    <small>
-                      {price &&
-                        <Money data={price} />
-                      }
-                    </small>
+                    <small>{price && <Money data={price} />}</small>
                   </div>
                 </Link>
               </div>
-            );
-          });
+            )
+          })
 
           return (
             <div>
@@ -156,14 +148,14 @@ function SearchResultsProducts({
                 </NextLink>
               </div>
             </div>
-          );
+          )
         }}
       </Pagination>
       <br />
     </div>
-  );
+  )
 }
 
 function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
+  return <p>No results, try a different search.</p>
 }

@@ -1,27 +1,27 @@
-import { Link, useNavigate } from 'react-router';
-import {type MappedProductOptions} from '@shopify/hydrogen';
+import { Link, useNavigate } from 'react-router'
+import { type MappedProductOptions } from '@shopify/hydrogen'
 import type {
   Maybe,
   ProductOptionValueSwatch,
-} from '@shopify/hydrogen/storefront-api-types';
-import {AddToCartButton} from './AddToCartButton';
-import {useAside} from './Aside';
-import type {ProductFragment} from 'storefrontapi.generated';
+} from '@shopify/hydrogen/storefront-api-types'
+import { AddToCartButton } from './AddToCartButton'
+import { useAside } from './Aside'
+import type { ProductFragment } from 'storefrontapi.generated'
 
 export function ProductForm({
   productOptions,
   selectedVariant,
 }: {
-  productOptions: MappedProductOptions[];
-  selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  productOptions: MappedProductOptions[]
+  selectedVariant: ProductFragment['selectedOrFirstAvailableVariant']
 }) {
-  const navigate = useNavigate();
-  const {open} = useAside();
+  const navigate = useNavigate()
+  const { open } = useAside()
   return (
     <div className="product-form">
       {productOptions.map((option) => {
         // If there is only a single value in the option values, don't display the option
-        if (option.optionValues.length === 1) return null;
+        if (option.optionValues.length === 1) return null
 
         return (
           <div className="product-options" key={option.name}>
@@ -37,7 +37,7 @@ export function ProductForm({
                   exists,
                   isDifferentProduct,
                   swatch,
-                } = value;
+                } = value
 
                 if (isDifferentProduct) {
                   // SEO
@@ -61,7 +61,7 @@ export function ProductForm({
                     >
                       <ProductOptionSwatch swatch={swatch} name={name} />
                     </Link>
-                  );
+                  )
                 } else {
                   // SEO
                   // When the variant is an update to the search param,
@@ -87,24 +87,24 @@ export function ProductForm({
                           navigate(`?${variantUriQuery}`, {
                             replace: true,
                             preventScrollReset: true,
-                          });
+                          })
                         }
                       }}
                     >
                       <ProductOptionSwatch swatch={swatch} name={name} />
                     </button>
-                  );
+                  )
                 }
               })}
             </div>
             <br />
           </div>
-        );
+        )
       })}
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
-          open('cart');
+          open('cart')
         }}
         lines={
           selectedVariant
@@ -121,20 +121,20 @@ export function ProductForm({
         {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
       </AddToCartButton>
     </div>
-  );
+  )
 }
 
 function ProductOptionSwatch({
   swatch,
   name,
 }: {
-  swatch?: Maybe<ProductOptionValueSwatch> | undefined;
-  name: string;
+  swatch?: Maybe<ProductOptionValueSwatch> | undefined
+  name: string
 }) {
-  const image = swatch?.image?.previewImage?.url;
-  const color = swatch?.color;
+  const image = swatch?.image?.previewImage?.url
+  const color = swatch?.color
 
-  if (!image && !color) return name;
+  if (!image && !color) return name
 
   return (
     <div
@@ -146,5 +146,5 @@ function ProductOptionSwatch({
     >
       {!!image && <img src={image} alt={name} />}
     </div>
-  );
+  )
 }

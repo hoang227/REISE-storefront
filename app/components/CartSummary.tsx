@@ -1,17 +1,17 @@
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import type {CartLayout} from '~/components/CartMain';
-import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
-import {useRef} from 'react';
-import { FetcherWithComponents } from 'react-router';
+import type { CartApiQueryFragment } from 'storefrontapi.generated'
+import type { CartLayout } from '~/components/CartMain'
+import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen'
+import { useRef } from 'react'
+import { FetcherWithComponents } from 'react-router'
 
 type CartSummaryProps = {
-  cart: OptimisticCart<CartApiQueryFragment | null>;
-  layout: CartLayout;
-};
+  cart: OptimisticCart<CartApiQueryFragment | null>
+  layout: CartLayout
+}
 
-export function CartSummary({cart, layout}: CartSummaryProps) {
+export function CartSummary({ cart, layout }: CartSummaryProps) {
   const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
+    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside'
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
@@ -30,10 +30,10 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
       <CartGiftCard giftCardCodes={cart.appliedGiftCards} />
       <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
     </div>
-  );
+  )
 }
-function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
-  if (!checkoutUrl) return null;
+function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
+  if (!checkoutUrl) return null
 
   return (
     <div>
@@ -42,18 +42,18 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
       </a>
       <br />
     </div>
-  );
+  )
 }
 
 function CartDiscounts({
   discountCodes,
 }: {
-  discountCodes?: CartApiQueryFragment['discountCodes'];
+  discountCodes?: CartApiQueryFragment['discountCodes']
 }) {
   const codes: string[] =
     discountCodes
       ?.filter((discount) => discount.applicable)
-      ?.map(({code}) => code) || [];
+      ?.map(({ code }) => code) || []
 
   return (
     <div>
@@ -80,15 +80,15 @@ function CartDiscounts({
         </div>
       </UpdateDiscountForm>
     </div>
-  );
+  )
 }
 
 function UpdateDiscountForm({
   discountCodes,
   children,
 }: {
-  discountCodes?: string[];
-  children: React.ReactNode;
+  discountCodes?: string[]
+  children: React.ReactNode
 }) {
   return (
     <CartForm
@@ -100,29 +100,29 @@ function UpdateDiscountForm({
     >
       {children}
     </CartForm>
-  );
+  )
 }
 
 function CartGiftCard({
   giftCardCodes,
 }: {
-  giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
+  giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined
 }) {
-  const appliedGiftCardCodes = useRef<string[]>([]);
-  const giftCardCodeInput = useRef<HTMLInputElement>(null);
+  const appliedGiftCardCodes = useRef<string[]>([])
+  const giftCardCodeInput = useRef<HTMLInputElement>(null)
   const codes: string[] =
-    giftCardCodes?.map(({lastCharacters}) => `***${lastCharacters}`) || [];
+    giftCardCodes?.map(({ lastCharacters }) => `***${lastCharacters}`) || []
 
   function saveAppliedCode(code: string) {
-    const formattedCode = code.replace(/\s/g, ''); // Remove spaces
+    const formattedCode = code.replace(/\s/g, '') // Remove spaces
     if (!appliedGiftCardCodes.current.includes(formattedCode)) {
-      appliedGiftCardCodes.current.push(formattedCode);
+      appliedGiftCardCodes.current.push(formattedCode)
     }
-    giftCardCodeInput.current!.value = '';
+    giftCardCodeInput.current!.value = ''
   }
 
   function removeAppliedCode() {
-    appliedGiftCardCodes.current = [];
+    appliedGiftCardCodes.current = []
   }
 
   return (
@@ -158,7 +158,7 @@ function CartGiftCard({
         </div>
       </UpdateGiftCardForm>
     </div>
-  );
+  )
 }
 
 function UpdateGiftCardForm({
@@ -166,10 +166,10 @@ function UpdateGiftCardForm({
   saveAppliedCode,
   children,
 }: {
-  giftCardCodes?: string[];
-  saveAppliedCode?: (code: string) => void;
-  removeAppliedCode?: () => void;
-  children: React.ReactNode;
+  giftCardCodes?: string[]
+  saveAppliedCode?: (code: string) => void
+  removeAppliedCode?: () => void
+  children: React.ReactNode
 }) {
   return (
     <CartForm
@@ -180,12 +180,12 @@ function UpdateGiftCardForm({
       }}
     >
       {(fetcher: FetcherWithComponents<any>) => {
-        const code = fetcher.formData?.get('giftCardCode');
+        const code = fetcher.formData?.get('giftCardCode')
         if (code && saveAppliedCode) {
-          saveAppliedCode(code as string);
+          saveAppliedCode(code as string)
         }
-        return children;
+        return children
       }}
     </CartForm>
-  );
+  )
 }
