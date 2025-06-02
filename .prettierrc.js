@@ -11,6 +11,9 @@ const config = {
   arrowParens: 'always',
   endOfLine: 'lf',
   jsxSingleQuote: false,
+  plugins: ['prettier-plugin-tailwindcss'],
+  tailwindAttributes: ['className', 'tw', 'clsx'],
+  tailwindFunctions: ['clsx', 'cn', 'twMerge'],
 }
 
 export default config
