@@ -1,45 +1,74 @@
-# Hydrogen template: Skeleton
+# REISE Storefront
 
-Hydrogen is Shopify’s stack for headless commerce. Hydrogen is designed to dovetail with [Remix](https://remix.run/), Shopify’s full stack web framework. This template contains a **minimal setup** of components, queries and tooling to get started with Hydrogen.
+A custom Shopify storefront built with Hydrogen, React, and Tailwind CSS for REISE's photobook and print products.
 
-[Check out Hydrogen docs](https://shopify.dev/custom-storefronts/hydrogen)
-[Get familiar with Remix](https://remix.run/docs/en/v1)
+## 🚀 Features
 
-## What's included
+- Custom photobook builder and editor
+- Modern, responsive design with Tailwind CSS
+- Built on Shopify's Hydrogen framework
+- React-based interactive UI components
+- Custom font integration
 
-- Remix
-- Hydrogen
-- Oxygen
-- Vite
-- Shopify CLI
-- ESLint
-- Prettier
-- GraphQL generator
-- TypeScript and JavaScript flavors
-- Minimal setup of components and routes
+## 🛠️ Tech Stack
 
-## Getting started
+- **Framework:** Shopify Hydrogen
+- **Frontend:** React, TypeScript
+- **Styling:** Tailwind CSS
+- **State Management:** React Router
+- **Package Manager:** npm
 
-**Requirements:**
+## 🏗️ Project Structure
 
-- Node.js version 18.0.0 or higher
-
-```bash
-npm create @shopify/hydrogen@latest
+```
+├── app/
+│   ├── components/    # Reusable UI components
+│   ├── routes/       # Application routes
+│   ├── styles/       # Global styles and Tailwind
+│   └── lib/         # Utility functions and helpers
+├── public/          # Static assets
+└── package.json     # Project dependencies
 ```
 
-## Building for production
+## 🚦 Branch Structure
 
+- `main` - Production-ready code
+- `develop` - Active development branch
+- `feature/*` - Feature-specific branches
+
+## 🔧 Development
+
+1. Clone the repository
 ```bash
-npm run build
+git clone https://github.com/hoang227/REISE-storefront.git
 ```
 
-## Local development
+2. Install dependencies
+```bash
+npm install
+```
 
+3. Start the development server
 ```bash
 npm run dev
 ```
 
-## Setup for using Customer Account API (`/account` section)
+## 📝 Development Workflow
 
-Follow step 1 and 2 of <https://shopify.dev/docs/custom-storefronts/building-with-the-customer-account-api/hydrogen#step-1-set-up-a-public-domain-for-local-development>
+1. Create feature branches from `develop` for significant features
+2. Commit changes with descriptive messages
+3. Merge completed features back to `develop`
+4. Deploy to production by merging `develop` into `main`
+
+## 🌐 Environment Setup
+
+Make sure to set up your `.env` file with necessary Shopify credentials:
+
+```env
+PUBLIC_STORE_DOMAIN=your-store.myshopify.com
+PUBLIC_STOREFRONT_API_TOKEN=your-storefront-api-token
+```
+
+## 📦 Deployment
+
+The storefront is deployed through Shopify's hosting infrastructure. Deployments are triggered automatically when changes are pushed to the `main` branch.
