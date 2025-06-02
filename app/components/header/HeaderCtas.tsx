@@ -64,7 +64,18 @@ function CartBadge({count}: {count: number | null}) {
   const {publish, shop, cart, prevCart} = useAnalytics()
 
   return (
-    <button className={cn(underlineAnimation, 'relative')}>
+    <button
+      onClick={() => {
+        open('cart')
+        publish('cart_viewed', {
+          cart,
+          prevCart,
+          shop,
+          url: window.location.href || '',
+        })
+      }}
+      className={cn(underlineAnimation, 'relative')}
+    >
       <ShoppingBag className="h-5 w-5" />
       {count !== null && count > 0 && (
         <span
