@@ -1,46 +1,45 @@
-import {redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import { useLoaderData, type MetaFunction } from 'react-router';
-import {Money, Image, flattenConnection} from '@shopify/hydrogen';
-import type {OrderLineItemFullFragment} from 'customer-accountapi.generated';
-import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
+import { redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen'
+import { useLoaderData, type MetaFunction } from 'react-router'
+import { Money, Image, flattenConnection } from '@shopify/hydrogen'
+import type { OrderLineItemFullFragment } from 'customer-accountapi.generated'
+import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery'
 
-export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Order ${data?.order?.name}`}];
-};
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [{ title: `Order ${data?.order?.name}` }]
+}
 
-export async function loader({params, context}: LoaderFunctionArgs) {
+export async function loader({ params, context }: LoaderFunctionArgs) {
   if (!params.id) {
-    return redirect('/account/orders');
+    return redirect('/account/orders')
   }
 
-  const orderId = atob(params.id);
-  const {data, errors} = await context.customerAccount.query(
+  const orderId = atob(params.id)
+  const { data, errors } = await context.customerAccount.query(
     CUSTOMER_ORDER_QUERY,
     {
-      variables: {orderId},
-    },
-  );
+      variables: { orderId },
+    }
+  )
 
   if (errors?.length || !data?.order) {
-    throw new Error('Order not found');
+    throw new Error('Order not found')
   }
 
-  const {order} = data;
+  const { order } = data
 
-  const lineItems = flattenConnection(order.lineItems);
-  const discountApplications = flattenConnection(order.discountApplications);
+  const lineItems = flattenConnection(order.lineItems)
+  const discountApplications = flattenConnection(order.discountApplications)
 
   const fulfillmentStatus =
-    flattenConnection(order.fulfillments)[0]?.status ?? 'N/A';
+    flattenConnection(order.fulfillments)[0]?.status ?? 'N/A'
 
-  const firstDiscount = discountApplications[0]?.value;
+  const firstDiscount = discountApplications[0]?.value
 
-  const discountValue =
-    firstDiscount?.__typename === 'MoneyV2' && firstDiscount;
+  const discountValue = firstDiscount?.__typename === 'MoneyV2' && firstDiscount
 
   const discountPercentage =
     firstDiscount?.__typename === 'PricingPercentageValue' &&
-    firstDiscount?.percentage;
+    firstDiscount?.percentage
 
   return {
     order,
@@ -48,7 +47,7 @@ export async function loader({params, context}: LoaderFunctionArgs) {
     discountValue,
     discountPercentage,
     fulfillmentStatus,
-  };
+  }
 }
 
 export default function OrderRoute() {
@@ -58,9 +57,9 @@ export default function OrderRoute() {
     discountValue,
     discountPercentage,
     fulfillmentStatus,
-  } = useLoaderData<typeof loader>();
+  } = useLoaderData<typeof loader>()
   return (
-    (<div className="account-order">
+    <div className="account-order">
       <h2>Order {order.name}</h2>
       <p>Placed on {new Date(order.processedAt!).toDateString()}</p>
       <br />
@@ -77,7 +76,7 @@ export default function OrderRoute() {
           <tbody>
             {lineItems.map((lineItem, lineItemIndex) => (
               // eslint-disable-next-line react/no-array-index-key
-              (<OrderLineRow key={lineItemIndex} lineItem={lineItem} />)
+              <OrderLineRow key={lineItemIndex} lineItem={lineItem} />
             ))}
           </tbody>
           <tfoot>
@@ -165,11 +164,11 @@ export default function OrderRoute() {
           View Order Status →
         </a>
       </p>
-    </div>)
-  );
+    </div>
+  )
 }
 
-function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
+function OrderLineRow({ lineItem }: { lineItem: OrderLineItemFullFragment }) {
   return (
     <tr key={lineItem.id}>
       <td>
@@ -193,5 +192,5 @@ function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
         <Money data={lineItem.totalDiscount!} />
       </td>
     </tr>
-  );
+  )
 }

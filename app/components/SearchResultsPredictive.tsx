@@ -1,40 +1,40 @@
-import { Link, useFetcher, type Fetcher } from 'react-router';
-import {Image, Money} from '@shopify/hydrogen';
-import React, {useRef, useEffect} from 'react';
+import { Link, useFetcher, type Fetcher } from 'react-router'
+import { Image, Money } from '@shopify/hydrogen'
+import React, { useRef, useEffect } from 'react'
 import {
   getEmptyPredictiveSearchResult,
   urlWithTrackingParams,
   type PredictiveSearchReturn,
-} from '~/lib/search';
-import {useAside} from './Aside';
+} from '~/lib/search'
+import { useAside } from './Aside'
 
-type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
+type PredictiveSearchItems = PredictiveSearchReturn['result']['items']
 
 type UsePredictiveSearchReturn = {
-  term: React.MutableRefObject<string>;
-  total: number;
-  inputRef: React.MutableRefObject<HTMLInputElement | null>;
-  items: PredictiveSearchItems;
-  fetcher: Fetcher<PredictiveSearchReturn>;
-};
+  term: React.MutableRefObject<string>
+  total: number
+  inputRef: React.MutableRefObject<HTMLInputElement | null>
+  items: PredictiveSearchItems
+  fetcher: Fetcher<PredictiveSearchReturn>
+}
 
 type SearchResultsPredictiveArgs = Pick<
   UsePredictiveSearchReturn,
   'term' | 'total' | 'inputRef' | 'items'
 > & {
-  state: Fetcher['state'];
-  closeSearch: () => void;
-};
+  state: Fetcher['state']
+  closeSearch: () => void
+}
 
 type PartialPredictiveSearchResult<
   ItemType extends keyof PredictiveSearchItems,
   ExtraProps extends keyof SearchResultsPredictiveArgs = 'term' | 'closeSearch',
 > = Pick<PredictiveSearchItems, ItemType> &
-  Pick<SearchResultsPredictiveArgs, ExtraProps>;
+  Pick<SearchResultsPredictiveArgs, ExtraProps>
 
 type SearchResultsPredictiveProps = {
-  children: (args: SearchResultsPredictiveArgs) => React.ReactNode;
-};
+  children: (args: SearchResultsPredictiveArgs) => React.ReactNode
+}
 
 /**
  * Component that renders predictive search results
@@ -42,16 +42,16 @@ type SearchResultsPredictiveProps = {
 export function SearchResultsPredictive({
   children,
 }: SearchResultsPredictiveProps) {
-  const aside = useAside();
-  const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
+  const aside = useAside()
+  const { term, inputRef, fetcher, total, items } = usePredictiveSearch()
 
   /*
    * Utility that resets the search input
    */
   function resetInput() {
     if (inputRef.current) {
-      inputRef.current.blur();
-      inputRef.current.value = '';
+      inputRef.current.blur()
+      inputRef.current.value = ''
     }
   }
 
@@ -59,8 +59,8 @@ export function SearchResultsPredictive({
    * Utility that resets the search input and closes the search aside
    */
   function closeSearch() {
-    resetInput();
-    aside.close();
+    resetInput()
+    aside.close()
   }
 
   return children({
@@ -70,22 +70,22 @@ export function SearchResultsPredictive({
     state: fetcher.state,
     term,
     total,
-  });
+  })
 }
 
-SearchResultsPredictive.Articles = SearchResultsPredictiveArticles;
-SearchResultsPredictive.Collections = SearchResultsPredictiveCollections;
-SearchResultsPredictive.Pages = SearchResultsPredictivePages;
-SearchResultsPredictive.Products = SearchResultsPredictiveProducts;
-SearchResultsPredictive.Queries = SearchResultsPredictiveQueries;
-SearchResultsPredictive.Empty = SearchResultsPredictiveEmpty;
+SearchResultsPredictive.Articles = SearchResultsPredictiveArticles
+SearchResultsPredictive.Collections = SearchResultsPredictiveCollections
+SearchResultsPredictive.Pages = SearchResultsPredictivePages
+SearchResultsPredictive.Products = SearchResultsPredictiveProducts
+SearchResultsPredictive.Queries = SearchResultsPredictiveQueries
+SearchResultsPredictive.Empty = SearchResultsPredictiveEmpty
 
 function SearchResultsPredictiveArticles({
   term,
   articles,
   closeSearch,
 }: PartialPredictiveSearchResult<'articles'>) {
-  if (!articles.length) return null;
+  if (!articles.length) return null
 
   return (
     <div className="predictive-search-result" key="articles">
@@ -96,7 +96,7 @@ function SearchResultsPredictiveArticles({
             baseUrl: `/blogs/${article.blog.handle}/${article.handle}`,
             trackingParams: article.trackingParameters,
             term: term.current ?? '',
-          });
+          })
 
           return (
             <li className="predictive-search-result-item" key={article.id}>
@@ -114,11 +114,11 @@ function SearchResultsPredictiveArticles({
                 </div>
               </Link>
             </li>
-          );
+          )
         })}
       </ul>
     </div>
-  );
+  )
 }
 
 function SearchResultsPredictiveCollections({
@@ -126,7 +126,7 @@ function SearchResultsPredictiveCollections({
   collections,
   closeSearch,
 }: PartialPredictiveSearchResult<'collections'>) {
-  if (!collections.length) return null;
+  if (!collections.length) return null
 
   return (
     <div className="predictive-search-result" key="collections">
@@ -137,7 +137,7 @@ function SearchResultsPredictiveCollections({
             baseUrl: `/collections/${collection.handle}`,
             trackingParams: collection.trackingParameters,
             term: term.current,
-          });
+          })
 
           return (
             <li className="predictive-search-result-item" key={collection.id}>
@@ -155,11 +155,11 @@ function SearchResultsPredictiveCollections({
                 </div>
               </Link>
             </li>
-          );
+          )
         })}
       </ul>
     </div>
-  );
+  )
 }
 
 function SearchResultsPredictivePages({
@@ -167,7 +167,7 @@ function SearchResultsPredictivePages({
   pages,
   closeSearch,
 }: PartialPredictiveSearchResult<'pages'>) {
-  if (!pages.length) return null;
+  if (!pages.length) return null
 
   return (
     <div className="predictive-search-result" key="pages">
@@ -178,7 +178,7 @@ function SearchResultsPredictivePages({
             baseUrl: `/pages/${page.handle}`,
             trackingParams: page.trackingParameters,
             term: term.current,
-          });
+          })
 
           return (
             <li className="predictive-search-result-item" key={page.id}>
@@ -188,11 +188,11 @@ function SearchResultsPredictivePages({
                 </div>
               </Link>
             </li>
-          );
+          )
         })}
       </ul>
     </div>
-  );
+  )
 }
 
 function SearchResultsPredictiveProducts({
@@ -200,7 +200,7 @@ function SearchResultsPredictiveProducts({
   products,
   closeSearch,
 }: PartialPredictiveSearchResult<'products'>) {
-  if (!products.length) return null;
+  if (!products.length) return null
 
   return (
     <div className="predictive-search-result" key="products">
@@ -211,10 +211,10 @@ function SearchResultsPredictiveProducts({
             baseUrl: `/products/${product.handle}`,
             trackingParams: product.trackingParameters,
             term: term.current,
-          });
+          })
 
-          const price = product?.selectedOrFirstAvailableVariant?.price;
-          const image = product?.selectedOrFirstAvailableVariant?.image;
+          const price = product?.selectedOrFirstAvailableVariant?.price
+          const image = product?.selectedOrFirstAvailableVariant?.image
           return (
             <li className="predictive-search-result-item" key={product.id}>
               <Link to={productUrl} onClick={closeSearch}>
@@ -228,54 +228,50 @@ function SearchResultsPredictiveProducts({
                 )}
                 <div>
                   <p>{product.title}</p>
-                  <small>
-                    {price && (
-                      <Money data={price} />
-                    )}
-                  </small>
+                  <small>{price && <Money data={price} />}</small>
                 </div>
               </Link>
             </li>
-          );
+          )
         })}
       </ul>
     </div>
-  );
+  )
 }
 
 function SearchResultsPredictiveQueries({
   queries,
   queriesDatalistId,
 }: PartialPredictiveSearchResult<'queries', never> & {
-  queriesDatalistId: string;
+  queriesDatalistId: string
 }) {
-  if (!queries.length) return null;
+  if (!queries.length) return null
 
   return (
     <datalist id={queriesDatalistId}>
       {queries.map((suggestion) => {
-        if (!suggestion) return null;
+        if (!suggestion) return null
 
-        return <option key={suggestion.text} value={suggestion.text} />;
+        return <option key={suggestion.text} value={suggestion.text} />
       })}
     </datalist>
-  );
+  )
 }
 
 function SearchResultsPredictiveEmpty({
   term,
 }: {
-  term: React.MutableRefObject<string>;
+  term: React.MutableRefObject<string>
 }) {
   if (!term.current) {
-    return null;
+    return null
   }
 
   return (
     <p>
       No results found for <q>{term.current}</q>
     </p>
-  );
+  )
 }
 
 /**
@@ -286,23 +282,23 @@ function SearchResultsPredictiveEmpty({
  * '''
  **/
 function usePredictiveSearch(): UsePredictiveSearchReturn {
-  const fetcher = useFetcher<PredictiveSearchReturn>({key: 'search'});
-  const term = useRef<string>('');
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const fetcher = useFetcher<PredictiveSearchReturn>({ key: 'search' })
+  const term = useRef<string>('')
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   if (fetcher?.state === 'loading') {
-    term.current = String(fetcher.formData?.get('q') || '');
+    term.current = String(fetcher.formData?.get('q') || '')
   }
 
   // capture the search input element as a ref
   useEffect(() => {
     if (!inputRef.current) {
-      inputRef.current = document.querySelector('input[type="search"]');
+      inputRef.current = document.querySelector('input[type="search"]')
     }
-  }, []);
+  }, [])
 
-  const {items, total} =
-    fetcher?.data?.result ?? getEmptyPredictiveSearchResult();
+  const { items, total } =
+    fetcher?.data?.result ?? getEmptyPredictiveSearchResult()
 
-  return {items, total, inputRef, term, fetcher};
+  return { items, total, inputRef, term, fetcher }
 }

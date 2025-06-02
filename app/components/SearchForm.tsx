@@ -1,11 +1,11 @@
-import {useRef, useEffect} from 'react';
-import { Form, type FormProps } from 'react-router';
+import { useRef, useEffect } from 'react'
+import { Form, type FormProps } from 'react-router'
 
 type SearchFormProps = Omit<FormProps, 'children'> & {
   children: (args: {
-    inputRef: React.RefObject<HTMLInputElement>;
-  }) => React.ReactNode;
-};
+    inputRef: React.RefObject<HTMLInputElement>
+  }) => React.ReactNode
+}
 
 /**
  * Search form component that sends search requests to the `/search` route.
@@ -26,20 +26,20 @@ type SearchFormProps = Omit<FormProps, 'children'> & {
  *  )}
  *  </SearchForm>
  */
-export function SearchForm({children, ...props}: SearchFormProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+export function SearchForm({ children, ...props }: SearchFormProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
-  useFocusOnCmdK(inputRef);
+  useFocusOnCmdK(inputRef)
 
   if (typeof children !== 'function') {
-    return null;
+    return null
   }
 
   return (
     <Form method="get" {...props}>
-      {children({inputRef})}
+      {children({ inputRef })}
     </Form>
-  );
+  )
 }
 
 /**
@@ -50,19 +50,19 @@ function useFocusOnCmdK(inputRef: React.RefObject<HTMLInputElement>) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'k' && event.metaKey) {
-        event.preventDefault();
-        inputRef.current?.focus();
+        event.preventDefault()
+        inputRef.current?.focus()
       }
 
       if (event.key === 'Escape') {
-        inputRef.current?.blur();
+        inputRef.current?.blur()
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [inputRef]);
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [inputRef])
 }

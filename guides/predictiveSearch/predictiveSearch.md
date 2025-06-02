@@ -15,7 +15,7 @@ This integration uses the storefront API (SFAPI) [predictiveSearch](https://shop
 
 | File                                                                                             | Description                                                                                                                                            |
 | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`app/components/SearchFormPredictive.tsx`](../../app/components/SearchFormPredictive.tsx)       | A fully customizable form component configured to make form `GET` requests to the `/search` route.                                                    |
+| [`app/components/SearchFormPredictive.tsx`](../../app/components/SearchFormPredictive.tsx)       | A fully customizable form component configured to make form `GET` requests to the `/search` route.                                                     |
 | [`app/components/SearchResultsPredictive.tsx`](../../app/components/SearchResultsPredictive.tsx) | A fully customizable search results wrapper, that provides compound components to render `articles`, `pages`, `products`, `collections` and `queries`. |
 
 ## Instructions
@@ -52,7 +52,7 @@ const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
     }
     trackingParameters
   }
-` as const;
+` as const
 
 const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
   fragment PredictiveCollection on Collection {
@@ -68,7 +68,7 @@ const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
     }
     trackingParameters
   }
-` as const;
+` as const
 
 const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
   fragment PredictivePage on Page {
@@ -78,7 +78,7 @@ const PREDICTIVE_SEARCH_PAGE_FRAGMENT = `#graphql
     handle
     trackingParameters
   }
-` as const;
+` as const
 
 const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment PredictiveProduct on Product {
@@ -105,7 +105,7 @@ const PREDICTIVE_SEARCH_PRODUCT_FRAGMENT = `#graphql
       }
     }
   }
-` as const;
+` as const
 
 const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
   fragment PredictiveQuery on SearchQuerySuggestion {
@@ -114,7 +114,7 @@ const PREDICTIVE_SEARCH_QUERY_FRAGMENT = `#graphql
     styledText
     trackingParameters
   }
-` as const;
+` as const
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/queries/predictiveSearch
 const PREDICTIVE_SEARCH_QUERY = `#graphql
@@ -154,7 +154,7 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
   ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
   ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
   ${PREDICTIVE_SEARCH_QUERY_FRAGMENT}
-` as const;
+` as const
 
 /**
  * Predictive search fetcher
@@ -163,14 +163,14 @@ async function predictiveSearch({
   request,
   context,
 }: Pick<ActionFunctionArgs, 'request' | 'context'>) {
-  const {storefront} = context;
-  const formData = await request.formData();
-  const term = String(formData.get('q') || '');
+  const { storefront } = context
+  const formData = await request.formData()
+  const term = String(formData.get('q') || '')
 
-  const limit = Number(formData.get('limit') || 10);
+  const limit = Number(formData.get('limit') || 10)
 
   // Predictively search articles, collections, pages, products, and queries (suggestions)
-  const {predictiveSearch: items, errors} = await storefront.query(
+  const { predictiveSearch: items, errors } = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {
       variables: {
@@ -179,22 +179,25 @@ async function predictiveSearch({
         limitScope: 'EACH',
         term,
       },
-    },
-  );
+    }
+  )
 
   if (errors) {
     throw new Error(
-      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
-    );
+      `Shopify API errors: ${errors.map(({ message }) => message).join(', ')}`
+    )
   }
 
   if (!items) {
-    throw new Error('No predictive search data returned');
+    throw new Error('No predictive search data returned')
   }
 
-  const total = Object.values(items).reduce((acc, {length}) => acc + length, 0);
+  const total = Object.values(items).reduce(
+    (acc, { length }) => acc + length,
+    0
+  )
 
-  return {term, result: {items, total}, error: null};
+  return { term, result: { items, total }, error: null }
 }
 ```
 
@@ -212,22 +215,22 @@ the form if present in it's children prop.
  * Handles predictive search GET requests
  * requested by the SearchFormPredictive component
  */
-export async function loader({request, context}: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const isPredictive = url.searchParams.has('predictive');
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const url = new URL(request.url)
+  const isPredictive = url.searchParams.has('predictive')
 
   if (!isPredictive) {
     return {}
   }
 
-  const searchPromise = predictiveSearch({request, context})
+  const searchPromise = predictiveSearch({ request, context })
 
   searchPromise.catch((error: Error) => {
-    console.error(error);
-    return {term: '', result: null, error: error.message};
-  });
+    console.error(error)
+    return { term: '', result: null, error: error.message }
+  })
 
-  return await searchPromise;
+  return await searchPromise
 }
 ```
 
@@ -332,7 +335,7 @@ function SearchAside() {
 - Modify the fetchers term variable to parse the new name. e.g
 
 ```ts
-const term = String(searchParams.get('query') || '');
+const term = String(searchParams.get('query') || '')
 ```
 
 ### How to customize the way the results look?

@@ -1,4 +1,4 @@
-import type {Config} from 'tailwindcss';
+import type {Config} from 'tailwindcss'
 
 const config: Config = {
   darkMode: ['class'],
@@ -6,7 +6,11 @@ const config: Config = {
   plugins: [],
   theme: {
     extend: {
-      colors: {},
+      colors: {
+        brand: {
+          accent: '#7C3AED',
+        },
+      },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],
       },
@@ -21,6 +25,6 @@ const config: Config = {
       },
     },
   },
-};
+}
 
-export default config;
+export default config

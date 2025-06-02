@@ -1,21 +1,22 @@
-import {Suspense} from 'react';
-import { Await, NavLink, useAsyncValue } from 'react-router';
+import {Suspense, useEffect, useState} from 'react'
+import {Await, NavLink, useAsyncValue} from 'react-router'
 import {
   type CartViewPayload,
   useAnalytics,
   useOptimisticCart,
-} from '@shopify/hydrogen';
-import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
+} from '@shopify/hydrogen'
+import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated'
+import {useAside} from '~/components/Aside'
+import {cn} from '~/lib/utils'
 
 interface HeaderProps {
-  header: HeaderQuery;
-  cart: Promise<CartApiQueryFragment | null>;
-  isLoggedIn: Promise<boolean>;
-  publicStoreDomain: string;
+  header: HeaderQuery
+  cart: Promise<CartApiQueryFragment | null>
+  isLoggedIn: Promise<boolean>
+  publicStoreDomain: string
 }
 
-type Viewport = 'desktop' | 'mobile';
+type Viewport = 'desktop' | 'mobile'
 
 export function Header({
   header,
@@ -23,21 +24,73 @@ export function Header({
   cart,
   publicStoreDomain,
 }: HeaderProps) {
-  const {shop, menu} = header;
+  const {shop, menu} = header
+
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isScrollingUp, setIsScrollingUp] = useState(false)
+  const [lastScrollY, setLastScrollY] = useState(0)
+  const {type: asideType} = useAside()
+
+  useEffect(() => {
+    const root = document.documentElement
+
+    // Set the announcement banner height CSS variable
+    root.style.setProperty('--announcement-height', isScrolled ? '0px' : '40px')
+
+    // Set the main header height CSS variable
+    root.style.setProperty('--header-height', isScrolled ? '64px' : '80px')
+
+    const handleScroll = () => {
+      // Don't process scroll events if aside/cart is open
+      if (asideType !== 'closed') return
+
+      const currScrollY = window.scrollY
+
+      // Update scroll direction state
+      setIsScrollingUp(currScrollY < lastScrollY)
+
+      // Store current scroll position for next comparison
+      setLastScrollY(currScrollY)
+
+      // Update scrolled state based on scroll position
+      setIsScrolled(currScrollY > 0)
+    }
+
+    // Add scroll event listener with passive flag for better performance
+    window.addEventListener('scroll', handleScroll, {passive: true})
+
+    // Cleanup function to remove event listener when component unmounts
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollY, isScrolled, asideType])
+
   return (
-    <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
-      </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
-    </header>
-  );
+    <div
+      className={cn(
+        'fixed z-40 w-full translate-y-0',
+        'transition-transform duration-500 ease-in-out'
+      )}
+    >
+      {/** Announcement Bar */}
+      <div
+        className={cn(
+          'overflow-hidden bg-black text-white',
+          'transition-all duration-500 ease-in-out',
+          isScrolled ? 'max-h-0' : 'max-h-12'
+        )}
+      >
+        <div className={cn('container mx-auto px-4 py-2', 'text-center')}>
+          <p
+            className={cn(
+              'font-sans text-[13px] font-light',
+              'leading-tight tracking-wider'
+            )}
+          >
+            Free shipping for orders above SGD50
+          </p>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function HeaderMenu({
@@ -46,13 +99,13 @@ export function HeaderMenu({
   viewport,
   publicStoreDomain,
 }: {
-  menu: HeaderProps['header']['menu'];
-  primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
-  viewport: Viewport;
-  publicStoreDomain: HeaderProps['publicStoreDomain'];
+  menu: HeaderProps['header']['menu']
+  primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url']
+  viewport: Viewport
+  publicStoreDomain: HeaderProps['publicStoreDomain']
 }) {
-  const className = `header-menu-${viewport}`;
-  const {close} = useAside();
+  const className = `header-menu-${viewport}`
+  const {close} = useAside()
 
   return (
     <nav className={className} role="navigation">
@@ -68,15 +121,14 @@ export function HeaderMenu({
         </NavLink>
       )}
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
+        if (!item.url) return null
 
-        // if the url is internal, we strip the domain
         const url =
           item.url.includes('myshopify.com') ||
           item.url.includes(publicStoreDomain) ||
           item.url.includes(primaryDomainUrl)
             ? new URL(item.url).pathname
-            : item.url;
+            : item.url
         return (
           <NavLink
             className="header-menu-item"
@@ -89,10 +141,10 @@ export function HeaderMenu({
           >
             {item.title}
           </NavLink>
-        );
+        )
       })}
     </nav>
-  );
+  )
 }
 
 function HeaderCtas({
@@ -112,11 +164,11 @@ function HeaderCtas({
       <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
-  );
+  )
 }
 
 function HeaderMenuMobileToggle() {
-  const {open} = useAside();
+  const {open} = useAside()
   return (
     <button
       className="header-menu-mobile-toggle reset"
@@ -124,39 +176,39 @@ function HeaderMenuMobileToggle() {
     >
       <h3>☰</h3>
     </button>
-  );
+  )
 }
 
 function SearchToggle() {
-  const {open} = useAside();
+  const {open} = useAside()
   return (
     <button className="reset" onClick={() => open('search')}>
       Search
     </button>
-  );
+  )
 }
 
 function CartBadge({count}: {count: number | null}) {
-  const {open} = useAside();
-  const {publish, shop, cart, prevCart} = useAnalytics();
+  const {open} = useAside()
+  const {publish, shop, cart, prevCart} = useAnalytics()
 
   return (
     <a
       href="/cart"
       onClick={(e) => {
-        e.preventDefault();
-        open('cart');
+        e.preventDefault()
+        open('cart')
         publish('cart_viewed', {
           cart,
           prevCart,
           shop,
           url: window.location.href || '',
-        } as CartViewPayload);
+        } as CartViewPayload)
       }}
     >
       Cart {count === null ? <span>&nbsp;</span> : count}
     </a>
-  );
+  )
 }
 
 function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
@@ -166,13 +218,13 @@ function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
         <CartBanner />
       </Await>
     </Suspense>
-  );
+  )
 }
 
 function CartBanner() {
-  const originalCart = useAsyncValue() as CartApiQueryFragment | null;
-  const cart = useOptimisticCart(originalCart);
-  return <CartBadge count={cart?.totalQuantity ?? 0} />;
+  const originalCart = useAsyncValue() as CartApiQueryFragment | null
+  const cart = useOptimisticCart(originalCart)
+  return <CartBadge count={cart?.totalQuantity ?? 0} />
 }
 
 const FALLBACK_HEADER_MENU = {
@@ -215,17 +267,17 @@ const FALLBACK_HEADER_MENU = {
       items: [],
     },
   ],
-};
+}
 
 function activeLinkStyle({
   isActive,
   isPending,
 }: {
-  isActive: boolean;
-  isPending: boolean;
+  isActive: boolean
+  isPending: boolean
 }) {
   return {
     fontWeight: isActive ? 'bold' : undefined,
     color: isPending ? 'grey' : 'black',
-  };
+  }
 }

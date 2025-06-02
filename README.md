@@ -39,16 +39,19 @@ A custom Shopify storefront built with Hydrogen, React, and Tailwind CSS for REI
 ## 🔧 Development
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/hoang227/REISE-storefront.git
 ```
 
 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 3. Start the development server
+
 ```bash
 npm run dev
 ```
