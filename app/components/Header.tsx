@@ -1,12 +1,13 @@
-import { Suspense, useEffect, useState } from 'react'
-import { Await, NavLink, useAsyncValue } from 'react-router'
+import {Suspense, useEffect, useState} from 'react'
+import {Await, NavLink, useAsyncValue} from 'react-router'
 import {
   type CartViewPayload,
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen'
-import type { HeaderQuery, CartApiQueryFragment } from 'storefrontapi.generated'
-import { useAside } from '~/components/Aside'
+import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated'
+import {useAside} from '~/components/Aside'
+import {cn} from '~/lib/utils'
 
 interface HeaderProps {
   header: HeaderQuery
@@ -23,12 +24,12 @@ export function Header({
   cart,
   publicStoreDomain,
 }: HeaderProps) {
-  const { shop, menu } = header
+  const {shop, menu} = header
 
   const [isScrolled, setIsScrolled] = useState(false)
   const [isScrollingUp, setIsScrollingUp] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
-  const { type: asideType } = useAside()
+  const {type: asideType} = useAside()
 
   useEffect(() => {
     const root = document.documentElement
@@ -56,16 +57,38 @@ export function Header({
     }
 
     // Add scroll event listener with passive flag for better performance
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, {passive: true})
 
     // Cleanup function to remove event listener when component unmounts
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY, isScrolled, asideType])
 
   return (
-    <div className="fixed w-full z-40 transition-transform duration-500 ease-in-out translate-y-0">
+    <div
+      className={cn(
+        'fixed z-40 w-full translate-y-0',
+        'transition-transform duration-500 ease-in-out'
+      )}
+    >
       {/** Announcement Bar */}
-      <div className={``}>Free shipping for orders above SGD50</div>
+      <div
+        className={cn(
+          'overflow-hidden bg-black text-white',
+          'transition-all duration-500 ease-in-out',
+          isScrolled ? 'max-h-0' : 'max-h-12'
+        )}
+      >
+        <div className={cn('container mx-auto px-4 py-2', 'text-center')}>
+          <p
+            className={cn(
+              'font-sans text-[13px] font-light',
+              'leading-tight tracking-wider'
+            )}
+          >
+            Free shipping for orders above SGD50
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
@@ -82,7 +105,7 @@ export function HeaderMenu({
   publicStoreDomain: HeaderProps['publicStoreDomain']
 }) {
   const className = `header-menu-${viewport}`
-  const { close } = useAside()
+  const {close} = useAside()
 
   return (
     <nav className={className} role="navigation">
@@ -145,7 +168,7 @@ function HeaderCtas({
 }
 
 function HeaderMenuMobileToggle() {
-  const { open } = useAside()
+  const {open} = useAside()
   return (
     <button
       className="header-menu-mobile-toggle reset"
@@ -157,7 +180,7 @@ function HeaderMenuMobileToggle() {
 }
 
 function SearchToggle() {
-  const { open } = useAside()
+  const {open} = useAside()
   return (
     <button className="reset" onClick={() => open('search')}>
       Search
@@ -165,9 +188,9 @@ function SearchToggle() {
   )
 }
 
-function CartBadge({ count }: { count: number | null }) {
-  const { open } = useAside()
-  const { publish, shop, cart, prevCart } = useAnalytics()
+function CartBadge({count}: {count: number | null}) {
+  const {open} = useAside()
+  const {publish, shop, cart, prevCart} = useAnalytics()
 
   return (
     <a
@@ -188,7 +211,7 @@ function CartBadge({ count }: { count: number | null }) {
   )
 }
 
-function CartToggle({ cart }: Pick<HeaderProps, 'cart'>) {
+function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
   return (
     <Suspense fallback={<CartBadge count={null} />}>
       <Await resolve={cart}>
