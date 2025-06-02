@@ -71,11 +71,12 @@ const Aside = ({children, heading, type}: AsideProps) => {
       if (event.key === 'Escape') {
         close()
       }
-      // Add event listener for keydown events
-      document.addEventListener('keydown', handleEscape)
-      // Cleanup: remove event listener when component unmounts or aside closes
-      return () => document.removeEventListener('keydown', handleEscape)
     }
+
+    // Add event listener when effect runs
+    document.addEventListener('keydown', handleEscape)
+    // Cleanup: remove event listener when component unmounts or aside closes
+    return () => document.removeEventListener('keydown', handleEscape)
   }, [expanded, close]) // Re-run if expanded state or close function changes
 
   return (
