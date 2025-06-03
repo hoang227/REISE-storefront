@@ -16,7 +16,7 @@ const shopButtonStyles = cn(
 
 const HeroSection = () => {
   return (
-    <section className="relative h-screen min-h-[600px] bg-black">
+    <section className="relative h-[100vh] min-h-[600px] bg-black">
       <Image
         alt="Hero Image"
         className="absolute inset-0 h-full w-full object-cover opacity-60"

@@ -8,7 +8,7 @@ import FeaturedCollectionSection from '~/components/homepage/FeaturedCollectionS
 import OurStorySection from '~/components/homepage/OurStorySection'
 import HowItWorksSection from '~/components/homepage/HowItWorksSection'
 import TestimonialsSection from '~/components/homepage/TestimonialsSection'
-import NewsletterSection from '~/components/homepage/NewsletterSection'
+import NewsletterSection from '~/components/footer/NewsletterSection'
 
 export const meta: MetaFunction = () => {
   return [{title: 'Hydrogen | Home'}]
@@ -67,7 +67,6 @@ export default function Homepage() {
       <HowItWorksSection />
       <OurStorySection />
       <TestimonialsSection />
-      <NewsletterSection />
     </div>
   )
 }
@@ -102,6 +101,10 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     handle
     priceRange {
       minVariantPrice {
+        amount
+        currencyCode
+      }
+      maxVariantPrice {
         amount
         currencyCode
       }

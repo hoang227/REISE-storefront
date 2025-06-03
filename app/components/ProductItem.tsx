@@ -25,24 +25,27 @@ const ProductItem = ({product, loading, hidePrice}: ProductItemProps) => {
 
   return (
     <Link
-      className="group relative block"
+      className="group relative block overflow-hidden rounded-2xl bg-neutral-100"
       key={product.id}
       prefetch="intent"
       to={variantUrl}
     >
-      {/** Image container with hover effect */}
-      <div className="group relative aspect-[4/5] overflow-hidden bg-white">
+      {/** Image wrapper with overflow hidden */}
+      <div className="relative aspect-[4/5] overflow-hidden rounded-t-2xl bg-white">
         {image && (
           <>
-            <Image
-              alt={image.altText || product.title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              data={image}
-              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-              loading={loading}
-            />
+            {/* Image with its own rounded corners */}
+            <div className="h-full w-full overflow-hidden rounded-t-2xl">
+              <Image
+                alt={image.altText || product.title}
+                className="h-full w-full rounded-b-none object-cover transition-transform duration-500 group-hover:scale-105"
+                data={image}
+                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                loading={loading}
+              />
+            </div>
 
-            {/** View Button */}
+            {/** Customize Button */}
             <div
               className={cn(
                 'absolute bottom-0 left-0 right-0',
@@ -66,22 +69,30 @@ const ProductItem = ({product, loading, hidePrice}: ProductItemProps) => {
       </div>
 
       {/** Product Information */}
-      <div className="relative pt-6">
+      <div className="relative px-4 py-6">
         <h4
           className={cn(
             'mb-2 font-sans text-lg text-black',
             'transition-colors duration-500',
-            'group-hover:text-brand-accent'
+            'group-hover:text-brand-accent group-hover:underline'
           )}
         >
           {product.title}
         </h4>
         <div className="flex items-center justify-between">
           {!hidePrice ? (
-            <Money
-              data={product.priceRange.minVariantPrice}
-              className="font-sans text-gray-600"
-            />
+            <div className="flex items-center justify-center font-sans font-light text-gray-600">
+              <span>SGD</span>
+              <Money
+                data={product.priceRange.minVariantPrice}
+                withoutCurrency
+              />
+              <span className="ml-[4px]">-</span>
+              <Money
+                data={product.priceRange.maxVariantPrice}
+                withoutCurrency
+              />
+            </div>
           ) : (
             <p className="font-sans text-sm font-light text-gray-600">
               {tagline}

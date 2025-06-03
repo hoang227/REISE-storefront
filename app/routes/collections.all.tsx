@@ -3,9 +3,13 @@ import {useLoaderData, type MetaFunction} from 'react-router'
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen'
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection'
 import ProductItem from '~/components/ProductItem'
+import {Link} from 'react-router'
+import HeroSection from '~/components/collections/HeroSection'
+import CollectionNavigationSection from '~/components/collections/CollectionNavigationSection'
+import ProductsGrid from '~/components/collections/ProductsGrid'
 
 export const meta: MetaFunction<typeof loader> = () => {
-  return [{title: `Hydrogen | Products`}]
+  return [{title: `REISE | All Photobooks`}]
 }
 
 export async function loader(args: LoaderFunctionArgs) {
@@ -48,22 +52,13 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 
 export default function Collection() {
   const {products} = useLoaderData<typeof loader>()
+  const productsLength = products?.nodes?.length || 0
 
   return (
     <div className="collection">
-      <h1>Products</h1>
-      <PaginatedResourceSection
-        connection={products}
-        resourcesClassName="products-grid"
-      >
-        {({node: product, index}) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+      <HeroSection />
+      <CollectionNavigationSection productsLength={productsLength} />
+      <ProductsGrid products={products} />
     </div>
   )
 }
