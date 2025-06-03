@@ -1,12 +1,14 @@
 import {type LoaderFunctionArgs} from '@shopify/remix-oxygen'
-import {Await, useLoaderData, Link, type MetaFunction} from 'react-router'
+import {Await, useLoaderData, Link, type MetaFunction, Form} from 'react-router'
 import {Suspense} from 'react'
-import {Image, Money} from '@shopify/hydrogen'
-import type {
-  FeaturedCollectionFragment,
-  RecommendedProductsQuery,
-} from 'storefrontapi.generated'
-import {ProductItem} from '~/components/ProductItem'
+import type {RecommendedProductsQuery} from 'storefrontapi.generated'
+import ProductItem from '~/components/ProductItem'
+import HeroSection from '~/components/homepage/HeroSection'
+import FeaturedCollectionSection from '~/components/homepage/FeaturedCollectionSection'
+import OurStorySection from '~/components/homepage/OurStorySection'
+import HowItWorksSection from '~/components/homepage/HowItWorksSection'
+import TestimonialsSection from '~/components/homepage/TestimonialsSection'
+import NewsletterSection from '~/components/homepage/NewsletterSection'
 
 export const meta: MetaFunction = () => {
   return [{title: 'Hydrogen | Home'}]
@@ -60,102 +62,12 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>()
   return (
     <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
-      <RecommendedProducts products={data.recommendedProducts} />
-    </div>
-  )
-}
-
-function FeaturedCollection({
-  collection,
-}: {
-  collection: FeaturedCollectionFragment
-}) {
-  if (!collection) return null
-  const image = collection?.image
-  return (
-    <Link
-      className="featured-collection"
-      to={`/collections/${collection.handle}`}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
-        </div>
-      )}
-      <h1>{collection.title}</h1>
-    </Link>
-  )
-}
-
-function RecommendedProducts({
-  products,
-}: {
-  products: Promise<RecommendedProductsQuery | null>
-}) {
-  return (
-    <div className="recommended-products bg-brand-background">
-      <h2 className="font-sans text-4xl font-bold text-black">
-        Recommended Products
-      </h2>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Await resolve={products}>
-          {(response) => (
-            <>
-              <div className="recommended-products-grid">
-                {response
-                  ? response.products.nodes.map((product) => (
-                      <ProductItem key={product.id} product={product} />
-                    ))
-                  : null}
-              </div>
-              <div className="recommended-products-grid">
-                {response
-                  ? response.products.nodes.map((product) => (
-                      <ProductItem key={product.id} product={product} />
-                    ))
-                  : null}
-              </div>
-              <div className="recommended-products-grid">
-                {response
-                  ? response.products.nodes.map((product) => (
-                      <ProductItem key={product.id} product={product} />
-                    ))
-                  : null}
-              </div>
-              <div className="recommended-products-grid">
-                {response
-                  ? response.products.nodes.map((product) => (
-                      <ProductItem key={product.id} product={product} />
-                    ))
-                  : null}
-              </div>
-              <div className="recommended-products-grid">
-                {response
-                  ? response.products.nodes.map((product) => (
-                      <ProductItem key={product.id} product={product} />
-                    ))
-                  : null}
-              </div>
-              <div className="recommended-products-grid">
-                {response
-                  ? response.products.nodes.map((product) => (
-                      <ProductItem key={product.id} product={product} />
-                    ))
-                  : null}
-              </div>
-              <div className="recommended-products-grid">
-                {response
-                  ? response.products.nodes.map((product) => (
-                      <ProductItem key={product.id} product={product} />
-                    ))
-                  : null}
-              </div>
-            </>
-          )}
-        </Await>
-      </Suspense>
-      <br />
+      <HeroSection />
+      <FeaturedCollectionSection data={data} />
+      <HowItWorksSection />
+      <OurStorySection />
+      <TestimonialsSection />
+      <NewsletterSection />
     </div>
   )
 }
@@ -194,12 +106,26 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
         currencyCode
       }
     }
+    images(first: 2) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
     featuredImage {
       id
       url
       altText
       width
       height
+    }
+    
+    # metafields
+    tagline: metafield(namespace: "product", key: "tag_line") {
+      value
     }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
