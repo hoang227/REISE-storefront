@@ -1,6 +1,7 @@
-import { Suspense } from 'react'
-import { Await, NavLink } from 'react-router'
-import type { FooterQuery, HeaderQuery } from 'storefrontapi.generated'
+import {Suspense} from 'react'
+import {Await, NavLink} from 'react-router'
+import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated'
+import NewsletterSection from './footer/NewsletterSection'
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>
@@ -42,34 +43,37 @@ function FooterMenu({
   publicStoreDomain: string
 }) {
   return (
-    <nav className="footer-menu" role="navigation">
-      {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
-        if (!item.url) return null
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url
-        const isExternal = !url.startsWith('/')
-        return isExternal ? (
-          <a href={url} key={item.id} rel="noopener noreferrer" target="_blank">
-            {item.title}
-          </a>
-        ) : (
-          <NavLink
-            end
-            key={item.id}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
-        )
-      })}
-    </nav>
+    <>
+      <NewsletterSection />
+    </>
+    // <nav className="footer-menu" role="navigation">
+    //   {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
+    //     if (!item.url) return null
+    //     // if the url is internal, we strip the domain
+    //     const url =
+    //       item.url.includes('myshopify.com') ||
+    //       item.url.includes(publicStoreDomain) ||
+    //       item.url.includes(primaryDomainUrl)
+    //         ? new URL(item.url).pathname
+    //         : item.url
+    //     const isExternal = !url.startsWith('/')
+    //     return isExternal ? (
+    //       <a href={url} key={item.id} rel="noopener noreferrer" target="_blank">
+    //         {item.title}
+    //       </a>
+    //     ) : (
+    //       <NavLink
+    //         end
+    //         key={item.id}
+    //         prefetch="intent"
+    //         style={activeLinkStyle}
+    //         to={url}
+    //       >
+    //         {item.title}
+    //       </NavLink>
+    //     )
+    //   })}
+    // </nav>
   )
 }
 

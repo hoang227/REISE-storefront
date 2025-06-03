@@ -140,19 +140,21 @@ export function Header({
             </div>
 
             {/** Logo (Above 550px) */}
-            <NavLink
-              prefetch="intent"
-              to="/"
-              className={cn(
-                'hover:text-brand-accent text-black',
-                'text-center font-sans tracking-wider',
-                'transition-all duration-300 ease-in-out max-[550px]:hidden',
+            <div className="mx-auto">
+              <NavLink
+                prefetch="intent"
+                to="/"
+                className={cn(
+                  'hover:text-brand-accent text-black',
+                  'text-center font-sans tracking-wider',
+                  'transition-all duration-300 ease-in-out max-[550px]:hidden',
 
-                isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'
-              )}
-            >
-              <h1 className="font-medium">REISE</h1>
-            </NavLink>
+                  isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'
+                )}
+              >
+                <h1 className="font-medium">REISE</h1>
+              </NavLink>
+            </div>
 
             {/** CTAS */}
             <div className="flex items-center justify-self-end">

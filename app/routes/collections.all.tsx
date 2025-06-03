@@ -1,11 +1,15 @@
-import { type LoaderFunctionArgs } from '@shopify/remix-oxygen'
-import { useLoaderData, type MetaFunction } from 'react-router'
-import { getPaginationVariables, Image, Money } from '@shopify/hydrogen'
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'
-import { ProductItem } from '~/components/ProductItem'
+import {type LoaderFunctionArgs} from '@shopify/remix-oxygen'
+import {useLoaderData, type MetaFunction} from 'react-router'
+import {getPaginationVariables, Image, Money} from '@shopify/hydrogen'
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection'
+import ProductItem from '~/components/ProductItem'
+import {Link} from 'react-router'
+import HeroSection from '~/components/collections/HeroSection'
+import CollectionNavigationSection from '~/components/collections/CollectionNavigationSection'
+import ProductsGrid from '~/components/collections/ProductsGrid'
 
 export const meta: MetaFunction<typeof loader> = () => {
-  return [{ title: `Hydrogen | Products` }]
+  return [{title: `REISE | All Photobooks`}]
 }
 
 export async function loader(args: LoaderFunctionArgs) {
@@ -15,26 +19,26 @@ export async function loader(args: LoaderFunctionArgs) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args)
 
-  return { ...deferredData, ...criticalData }
+  return {...deferredData, ...criticalData}
 }
 
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({ context, request }: LoaderFunctionArgs) {
-  const { storefront } = context
+async function loadCriticalData({context, request}: LoaderFunctionArgs) {
+  const {storefront} = context
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   })
 
-  const [{ products }] = await Promise.all([
+  const [{products}] = await Promise.all([
     storefront.query(CATALOG_QUERY, {
-      variables: { ...paginationVariables },
+      variables: {...paginationVariables},
     }),
     // Add other queries here, so that they are loaded in parallel
   ])
-  return { products }
+  return {products}
 }
 
 /**
@@ -42,28 +46,19 @@ async function loadCriticalData({ context, request }: LoaderFunctionArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({ context }: LoaderFunctionArgs) {
+function loadDeferredData({context}: LoaderFunctionArgs) {
   return {}
 }
 
 export default function Collection() {
-  const { products } = useLoaderData<typeof loader>()
+  const {products} = useLoaderData<typeof loader>()
+  const productsLength = products?.nodes?.length || 0
 
   return (
     <div className="collection">
-      <h1>Products</h1>
-      <PaginatedResourceSection
-        connection={products}
-        resourcesClassName="products-grid"
-      >
-        {({ node: product, index }) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+      <HeroSection />
+      <CollectionNavigationSection productsLength={productsLength} />
+      <ProductsGrid products={products} />
     </div>
   )
 }
@@ -83,6 +78,15 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
       url
       width
       height
+    }    
+    images(first: 2) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
     }
     priceRange {
       minVariantPrice {
@@ -91,6 +95,10 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
       maxVariantPrice {
         ...MoneyCollectionItem
       }
+    }
+    # metafields
+    tagline: metafield(namespace: "product", key: "tag_line") {
+      value
     }
   }
 ` as const
