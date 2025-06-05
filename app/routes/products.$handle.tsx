@@ -1,5 +1,6 @@
 import {redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen'
 import {useLoaderData, type MetaFunction} from 'react-router'
+import {Outlet, useLocation} from 'react-router'
 import {
   getSelectedProductOptions,
   Analytics,
@@ -89,6 +90,7 @@ function loadDeferredData({context, params}: LoaderFunctionArgs) {
 
 export default function Product() {
   const {product} = useLoaderData<typeof loader>()
+  const location = useLocation()
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -106,6 +108,15 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   })
 
+  // If we're on a nested route (upload or design), render the Outlet
+  if (
+    location.pathname.includes('/upload') ||
+    location.pathname.includes('/design')
+  ) {
+    return <Outlet context={{product, selectedVariant}} />
+  }
+
+  // Otherwise render the product page
   return (
     <div className="pb-12 pt-44 sm:pt-36">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
@@ -117,12 +128,12 @@ export default function Product() {
           />
 
           {/** Right side - Details & CTA */}
-          <div className="space-y-5 rounded border-[1.5px] border-black/30 p-6">
+          <div className="h-fit space-y-5 rounded border-[1.5px] border-black/30 p-6">
             <ProductInfo product={product} selectedVariant={selectedVariant} />
 
             <ProductOptions productOptions={productOptions} />
 
-            <ProductForm selectedVariant={selectedVariant} />
+            <ProductForm selectedVariant={selectedVariant} product={product} />
           </div>
         </div>
       </div>

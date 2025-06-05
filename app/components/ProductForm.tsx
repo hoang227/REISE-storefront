@@ -1,15 +1,13 @@
-import {type MappedProductOptions} from '@shopify/hydrogen'
-import {AddToCartButton} from './AddToCartButton'
-import {useAside} from './Aside'
 import type {ProductFragment} from 'storefrontapi.generated'
+import StartDesigningButton from './product/StartDesigningButton'
 
 export function ProductForm({
   selectedVariant,
+  product,
 }: {
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant']
+  product: ProductFragment
 }) {
-  const {open} = useAside()
-
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex items-center justify-between font-sans text-xs text-black/50">
@@ -20,25 +18,10 @@ export function ProductForm({
         </div>
         {selectedVariant?.sku && <div>SKU: {selectedVariant.sku}</div>}
       </div>
-      <AddToCartButton
-        disabled={!selectedVariant || !selectedVariant.availableForSale}
-        afterAddToCart={() => {
-          open('cart')
-        }}
-        lines={
-          selectedVariant
-            ? [
-                {
-                  merchandiseId: selectedVariant.id,
-                  quantity: 1,
-                  selectedVariant,
-                },
-              ]
-            : []
-        }
-      >
-        {selectedVariant?.availableForSale ? 'Add to Cart' : 'Sold out'}
-      </AddToCartButton>
+      <StartDesigningButton
+        selectedVariant={selectedVariant}
+        productHandle={product.handle}
+      />
     </div>
   )
 }

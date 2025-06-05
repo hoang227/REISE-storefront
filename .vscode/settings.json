@@ -13,5 +13,5 @@
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["metafields", "storefrontapi"]
+  "cSpell.words": ["metafields", "photobook", "storefrontapi"]
 }
