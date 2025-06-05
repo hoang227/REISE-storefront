@@ -1,0 +1,34 @@
+feat: enhance page layouts and components
+
+UI/UX Improvements:
+- Add dynamic hero images for about-us and FAQ pages
+- Improve product item styling with rounded corners and price range
+- Update header logo positioning and styling
+- Refine hero section height and overlay
+- Enhance "How It Works" section with 4 steps and new design
+
+Content Management:
+- Move newsletter section to footer
+- Add metafields support for page content (subtitle, intro, CTA)
+- Update page template with better typography and spacing
+- Add proper HTML structure for content sections
+
+Asset Management:
+- Add new hero images for pages (FAQ.jpg, Hands.jpg)
+- Add collections and general hero images
+- Fix image paths to use correct public directory structure
+
+Component Organization:
+- Create dedicated collections components directory
+- Move newsletter to footer components
+- Improve component file structure
+
+Technical Updates:
+- Update GraphQL queries to include maxVariantPrice
+- Fix type definitions for page metafields
+- Improve image handling with proper alt texts
+- Add responsive design improvements
+
+This commit introduces a more polished and consistent design
+across the site while improving content management capabilities
+through metafields and better asset organization.
