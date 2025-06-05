@@ -2,6 +2,7 @@ import {type FetcherWithComponents} from 'react-router'
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen'
 import {useEffect, useState} from 'react'
 import {Check, Loader2, ShoppingBag} from 'lucide-react'
+import {cn} from '~/lib/utils'
 
 export function AddToCartButton({
   analytics,
@@ -29,6 +30,31 @@ export function AddToCartButton({
     }
     return () => clearTimeout(timeout)
   }, [addedToCart])
+
+  const buttonBaseStyles = cn(
+    // Base styles
+    'relative flex w-full items-center justify-center gap-3',
+    'font-source text-base tracking-wider',
+    'px-8 py-5',
+
+    // Colors
+    'bg-black text-white',
+    'disabled:bg-brand-gray disabled:cursor-not-allowed',
+    'hover:bg-brand-accent',
+
+    // Animation setup
+    'overflow-hidden transition-all duration-300 ease-in-out',
+
+    // Shine effect
+    'before:absolute before:left-0 before:top-0',
+    'before:h-full before:w-full',
+    'before:translate-x-[-100%]',
+    'before:bg-white/10',
+    'before:transition-transform before:duration-700',
+    'before:content-[""]',
+    'hover:before:translate-x-[100%]',
+    'disabled:before:hidden'
+  )
 
   return (
     <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
@@ -59,7 +85,7 @@ export function AddToCartButton({
               type="submit"
               onClick={onClick}
               disabled={disabled || isLoading}
-              className="font-source hover:bg-brand-accent disabled:bg-brand-gray relative flex w-full items-center justify-center gap-3 overflow-hidden bg-black px-8 py-5 text-base tracking-wider text-white transition-all duration-300 ease-in-out before:absolute before:left-0 before:top-0 before:h-full before:w-full before:translate-x-[-100%] before:bg-white/10 before:transition-transform before:duration-700 before:content-[''] hover:before:translate-x-[100%] disabled:cursor-not-allowed disabled:before:hidden"
+              className={buttonBaseStyles}
             >
               {isLoading ? (
                 <>
@@ -81,8 +107,18 @@ export function AddToCartButton({
 
             {/** Premium Loading Indicator */}
             {isLoading && (
-              <div className="bg-brand-cream absolute bottom-0 left-0 h-0.5 w-full">
-                <div className="from-brand-gold to-brand-navy h-full animate-progress bg-gradient-to-r"></div>
+              <div
+                className={cn(
+                  'absolute bottom-0 left-0 h-0.5 w-full',
+                  'bg-brand-cream'
+                )}
+              >
+                <div
+                  className={cn(
+                    'h-full animate-progress',
+                    'from-brand-gold to-brand-navy bg-gradient-to-r'
+                  )}
+                />
               </div>
             )}
           </div>

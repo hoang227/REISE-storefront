@@ -13,6 +13,9 @@ import {ProductPrice} from '~/components/ProductPrice'
 import {GalleryImage, ProductImage} from '~/components/ProductImage'
 import {ProductForm} from '~/components/ProductForm'
 import {redirectIfHandleIsLocalized} from '~/lib/redirect'
+import ProductImageCarousel from '~/components/product/ProductImageCarousel'
+import ProductInfo from '~/components/product/ProductInfo'
+import ProductOptions from '~/components/product/ProductOptions'
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [
@@ -103,57 +106,23 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   })
 
-  const {title, descriptionHtml} = product
-
   return (
     <div className="pb-12 pt-44 sm:pt-36">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-          {/** Left side - Images */}
-          <div className="space-y-8">
-            <ProductImage
-              images={product.images.nodes.map(
-                (node) =>
-                  ({
-                    id: node.id,
-                    url: node.url,
-                    altText: node.altText,
-                    width: node.width,
-                    height: node.height,
-                  }) as GalleryImage
-              )}
-              selectedVariantImage={selectedVariant.image}
-            />
-          </div>
+          {/** Left side - Image Carousel */}
+          <ProductImageCarousel
+            product={product}
+            selectedVariant={selectedVariant}
+          />
 
           {/** Right side - Details & CTA */}
-          <div className="space-y-10 rounded border-[1.5px] border-black/30 p-6">
-            {/** Product Title and Price */}
-            <div className="space-y-4 border-b-[1.5px] border-black/30 pb-6">
-              <h1 className="font-sans text-2xl font-semibold text-black md:text-3xl lg:text-4xl">
-                {product.title}
-              </h1>
-              <ProductPrice
-                price={selectedVariant?.price}
-                compareAtPrice={selectedVariant?.compareAtPrice}
-                className="font-sans text-xl text-black"
-              />
-            </div>
+          <div className="space-y-5 rounded border-[1.5px] border-black/30 p-6">
+            <ProductInfo product={product} selectedVariant={selectedVariant} />
 
-            {/** Product Description */}
-            <div className="max-w-none font-sans text-sm text-black">
-              <div
-                dangerouslySetInnerHTML={{__html: product.descriptionHtml}}
-              />
-            </div>
+            <ProductOptions productOptions={productOptions} />
 
-            {/** Product Form */}
-            <ProductForm
-              product={product}
-              selectedVariant={selectedVariant}
-              productOptions={productOptions}
-              className="space-y-8"
-            />
+            <ProductForm selectedVariant={selectedVariant} />
           </div>
         </div>
       </div>
