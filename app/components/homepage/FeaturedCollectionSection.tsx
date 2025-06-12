@@ -1,6 +1,6 @@
 import {Suspense} from 'react'
 import {Await} from 'react-router'
-import ProductItem from '../ProductItem'
+import ProductItem from '../product/ProductItem'
 import type {
   RecommendedProductsQuery,
   FeaturedCollectionFragment,

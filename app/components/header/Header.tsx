@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import {NavLink} from 'react-router'
+import {NavLink, useLocation} from 'react-router'
 
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated'
 import {useAside} from '~/components/Aside'
@@ -7,6 +7,8 @@ import HeaderMenu from './HeaderMenu'
 import HeaderCtas from './HeaderCtas'
 import {cn} from '~/lib/utils'
 import {Menu} from 'lucide-react'
+import NoNavHeader from './NoNavHeader'
+import HeaderMenuMobileToggle from './HeaderMenuMobileToggle'
 
 export interface HeaderProps {
   header: HeaderQuery
@@ -22,6 +24,7 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header
+  const location = useLocation()
 
   const [isScrolled, setIsScrolled] = useState(false)
   const [isScrollingUp, setIsScrollingUp] = useState(false)
@@ -59,6 +62,10 @@ export function Header({
     // Cleanup function to remove event listener when component unmounts
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY, isScrolled, asideType])
+
+  if (location.pathname.includes('/upload')) {
+    return <NoNavHeader isScrolled={isScrolled} />
+  }
 
   return (
     <div
@@ -110,7 +117,7 @@ export function Header({
               to="/"
               className="inline-block font-sans text-2xl tracking-normal"
             >
-              <h1 className="hover:text-brand-accent my-0 font-medium text-black">
+              <h1 className="my-0 font-medium text-black hover:text-brand-accent">
                 REISE
               </h1>
             </NavLink>
@@ -145,7 +152,7 @@ export function Header({
                 prefetch="intent"
                 to="/"
                 className={cn(
-                  'hover:text-brand-accent text-black',
+                  'text-black hover:text-brand-accent',
                   'text-center font-sans tracking-wider',
                   'transition-all duration-300 ease-in-out max-[550px]:hidden',
 
@@ -158,23 +165,11 @@ export function Header({
 
             {/** CTAS */}
             <div className="flex items-center justify-self-end">
-              <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+              <HeaderCtas cart={cart} />
             </div>
           </div>
         </div>
       </header>
     </div>
-  )
-}
-
-function HeaderMenuMobileToggle() {
-  const {open} = useAside()
-  return (
-    <button
-      className="hover:text-brand-accent -ml-2 p-2 transition-colors duration-200"
-      onClick={() => open('mobile')}
-    >
-      <Menu className="h-5 w-5" />
-    </button>
   )
 }

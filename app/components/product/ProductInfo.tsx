@@ -1,5 +1,5 @@
 import {ProductFragment} from 'storefrontapi.generated'
-import {ProductPrice} from '../ProductPrice'
+import {ProductPrice} from './ProductPrice'
 
 type ProductInfoProps = {
   product: ProductFragment

@@ -24,13 +24,19 @@ const HeaderMenu = ({
   const {close} = useAside()
 
   const baseClassName = cn(
-    'transition-all duration-200 hover:text-brand-accent font-sans relative',
+    'relative font-sans transition-all duration-200 hover:text-brand-accent',
     'whitespace-nowrap',
     'after:content-[""]',
     'after:absolute after:bottom-0 after:left-0',
-    'after:w-0 after:h-[3px] after:bg-brand-accent',
+    'after:h-[3px] after:w-0 after:bg-brand-accent',
     'after:transition-all after:duration-300',
     'hover:after:w-full'
+  )
+
+  const disabledClassName = cn(
+    'relative font-sans opacity-0',
+    'whitespace-nowrap',
+    'cursor-default'
   )
 
   const desktopClassName = cn(
@@ -115,7 +121,7 @@ const HeaderMenu = ({
                 to="/account"
                 className={cn(
                   'flex items-center space-x-2',
-                  'hover:text-brand-accent text-black'
+                  'text-black hover:text-brand-accent'
                 )}
               >
                 <User className="h-5 w-5" />
@@ -130,7 +136,7 @@ const HeaderMenu = ({
                 }}
                 className={cn(
                   'flex w-full items-center space-x-2 text-left',
-                  'hover:text-brand-accent text-black'
+                  'text-black hover:text-brand-accent'
                 )}
               >
                 <Search className="h-5 w-5" />

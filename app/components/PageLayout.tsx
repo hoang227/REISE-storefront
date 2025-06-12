@@ -6,7 +6,7 @@ import type {
   HeaderQuery,
 } from 'storefrontapi.generated'
 import Aside from '~/components/Aside'
-import {Footer} from '~/components/Footer'
+import {Footer} from '~/components/footer/Footer'
 import {Header} from '~/components/header/Header'
 import HeaderMenu from './header/HeaderMenu'
 import {CartMain} from '~/components/CartMain'

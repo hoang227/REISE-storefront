@@ -4,10 +4,8 @@ import {
   type MetaFunction,
   useOutletContext,
   useBeforeUnload,
-  useBlocker,
-  Location,
 } from 'react-router'
-import {useState, useRef, useCallback} from 'react'
+import {useState, useRef, useCallback, useEffect} from 'react'
 import {
   Upload,
   X,
@@ -52,6 +50,13 @@ export default function ProductUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const maxImages = getMaxPagesFromVariant(selectedVariant)
 
+  // Search params
+  const searchParams = new URLSearchParams()
+  selectedVariant.selectedOptions.forEach((option) => {
+    searchParams.append(option.name, option.value)
+  })
+  const variantSearchParams = searchParams.toString()
+
   // Alert user when they refresh pages if there's any images uploaded
   useBeforeUnload(
     useCallback(
@@ -64,7 +69,55 @@ export default function ProductUpload() {
     )
   )
 
-  // TODO: Blocker for backward nav
+  // Block navigation when there are uploaded images
+  useEffect(() => {
+    if (!uploadedImages.length) return
+
+    // Add a history entry without changing the URL
+    window.history.pushState(null, document.title, window.location.href)
+
+    // Handle back/forward button clicks
+    function handlePopState(event: PopStateEvent) {
+      // Check if trying to navigate to design page
+      const currentPath = window.location.pathname
+      const isNavigatingToDesign = currentPath.includes('/design')
+
+      if (isNavigatingToDesign) {
+        // Allow navigation to design page
+        return
+      }
+
+      // Prevent navigation for other cases
+      event.preventDefault()
+      window.history.pushState(null, document.title, window.location.href)
+
+      // Show a confirmation dialog
+      const shouldLeave = window.confirm(
+        'You have uploaded images. Are you sure you want to leave? Your uploads will be lost.'
+      )
+
+      if (shouldLeave) {
+        // If user confirms, navigate using the router
+        navigate(
+          `/products/${product.handle}${variantSearchParams ? `?${variantSearchParams}` : ''}`
+        )
+      }
+    }
+
+    // Add event listener
+    window.addEventListener('popstate', handlePopState)
+
+    // Cleanup function to remove event listener
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [
+    uploadedImages,
+    navigate,
+    product.handle,
+    selectedVariant.selectedOptions,
+    variantSearchParams,
+  ])
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return
@@ -115,16 +168,25 @@ export default function ProductUpload() {
   }
 
   const handleContinue = () => {
-    // Create URL with variant options for the design page
-    const searchParams = new URLSearchParams()
-    selectedVariant.selectedOptions.forEach((option) => {
-      searchParams.append(option.name, option.value)
-    })
-    const variantSearchParams = searchParams.toString()
-
     // Save images to session/local storage or your backend
     navigate(
       `/products/${product.handle}/design${variantSearchParams ? `?${variantSearchParams}` : ''}`
+    )
+  }
+
+  // Handle back navigation with confirmation
+  const handleBack = () => {
+    if (uploadedImages.length > 0) {
+      const shouldLeave = window.confirm(
+        'You have uploaded images. Are you sure you want to leave? Your uploads will be lost.'
+      )
+      if (!shouldLeave) {
+        return
+      }
+    }
+
+    navigate(
+      `/products/${product.handle}${variantSearchParams ? `?${variantSearchParams}` : ''}`
     )
   }
 
@@ -205,8 +267,8 @@ export default function ProductUpload() {
             <Upload className="mx-auto mb-4 h-8 w-8 text-black/40" />
             <p className="text-md mb-1 font-sans font-medium text-black">
               {isDragging
-                ? 'Drop your images here'
-                : 'Drag & drop your images here'}
+                ? 'Drop your photos here'
+                : 'Drag & drop your photos here'}
             </p>
             <p className="font-sans text-sm text-black/60">
               or click to select files
@@ -252,18 +314,7 @@ export default function ProductUpload() {
         {/* Navigation */}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => {
-              // Create URL with variant options for the product page
-              const searchParams = new URLSearchParams()
-              selectedVariant.selectedOptions.forEach((option) => {
-                searchParams.append(option.name, option.value)
-              })
-              const variantSearchParams = searchParams.toString()
-
-              navigate(
-                `/products/${product.handle}${variantSearchParams ? `?${variantSearchParams}` : ''}`
-              )
-            }}
+            onClick={handleBack}
             className="flex items-center gap-2 rounded-full border border-black/30 px-6 py-3 font-sans text-sm hover:border-black"
           >
             <ChevronLeft className="h-4 w-4" />

@@ -1,7 +1,7 @@
 import {Suspense} from 'react'
 import {Await, NavLink} from 'react-router'
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated'
-import NewsletterSection from './footer/NewsletterSection'
+import NewsletterSection from './NewsletterSection'
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>

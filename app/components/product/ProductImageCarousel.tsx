@@ -1,5 +1,5 @@
 import {ProductFragment} from 'storefrontapi.generated'
-import {ProductImage, GalleryImage} from '../ProductImage'
+import {ProductImage, GalleryImage} from './ProductImage'
 
 type ProductImageCarouselProps = {
   product: ProductFragment

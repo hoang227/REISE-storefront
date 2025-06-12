@@ -1,5 +1,5 @@
 import type {ProductFragment} from 'storefrontapi.generated'
-import StartDesigningButton from './product/StartDesigningButton'
+import StartDesigningButton from './StartDesigningButton'
 
 export function ProductForm({
   selectedVariant,

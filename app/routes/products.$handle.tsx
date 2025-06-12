@@ -10,9 +10,9 @@ import {
   useSelectedOptionInUrlParam,
   RichText,
 } from '@shopify/hydrogen'
-import {ProductPrice} from '~/components/ProductPrice'
-import {GalleryImage, ProductImage} from '~/components/ProductImage'
-import {ProductForm} from '~/components/ProductForm'
+import {ProductPrice} from '~/components/product/ProductPrice'
+import {GalleryImage, ProductImage} from '~/components/product/ProductImage'
+import {ProductForm} from '~/components/product/ProductForm'
 import {redirectIfHandleIsLocalized} from '~/lib/redirect'
 import ProductImageCarousel from '~/components/product/ProductImageCarousel'
 import ProductInfo from '~/components/product/ProductInfo'
