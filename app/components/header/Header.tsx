@@ -104,26 +104,7 @@ export function Header({
         )}
       >
         <div className="container mx-auto">
-          {/** Mobile Logo (550px and below) */}
-          <div
-            className={cn(
-              'hidden border-b border-gray-100 text-center',
-              'transition-all duration-500 ease-in-out max-[550px]:block',
-              isScrolled ? 'py-1' : 'py-2'
-            )}
-          >
-            <NavLink
-              prefetch="intent"
-              to="/"
-              className="inline-block font-sans text-2xl tracking-normal"
-            >
-              <h1 className="my-0 font-medium text-black hover:text-brand-accent">
-                REISE
-              </h1>
-            </NavLink>
-          </div>
-
-          {/** Header Content */}
+          {/** Desktop Header */}
           <div
             className={cn(
               'grid grid-cols-3 px-4',
@@ -146,22 +127,31 @@ export function Header({
               />
             </div>
 
-            {/** Logo (Above 550px) */}
-            <div className="mx-auto">
-              <NavLink
-                prefetch="intent"
-                to="/"
-                className={cn(
-                  'text-black hover:text-brand-accent',
-                  'text-center font-sans tracking-wider',
-                  'transition-all duration-300 ease-in-out max-[550px]:hidden',
+            {/** Mobile Logo */}
+            <NavLink
+              prefetch="intent"
+              to="/"
+              className="inline-block text-center font-sans text-2xl tracking-normal min-[551px]:hidden"
+            >
+              <h1 className="my-0 font-medium text-black hover:text-brand-accent">
+                REISE
+              </h1>
+            </NavLink>
 
-                  isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'
-                )}
-              >
-                <h1 className="font-medium">REISE</h1>
-              </NavLink>
-            </div>
+            {/** Logo */}
+            <NavLink
+              prefetch="intent"
+              to="/"
+              className={cn(
+                'text-black hover:text-brand-accent',
+                'text-center font-sans tracking-wider',
+                'transition-all duration-300 ease-in-out max-[550px]:hidden',
+
+                isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'
+              )}
+            >
+              <h1 className="font-medium">REISE</h1>
+            </NavLink>
 
             {/** CTAS */}
             <div className="flex items-center justify-self-end">

@@ -14,6 +14,7 @@ const buttonBaseStyles = cn(
   'relative flex w-full items-center justify-center gap-3',
   'font-source text-base tracking-wider',
   'px-8 py-5',
+  'rounded-full',
 
   // Colors
   'bg-black text-white',

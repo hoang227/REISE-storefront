@@ -18,10 +18,15 @@ export function ProductForm({
         </div>
         {selectedVariant?.sku && <div>SKU: {selectedVariant.sku}</div>}
       </div>
-      <StartDesigningButton
-        selectedVariant={selectedVariant}
-        productHandle={product.handle}
-      />
+      <div>
+        <StartDesigningButton
+          selectedVariant={selectedVariant}
+          productHandle={product.handle}
+        />
+        <h1 className="mt-2 text-center font-sans text-sm font-medium text-black">
+          20+ bought in past week
+        </h1>
+      </div>
     </div>
   )
 }

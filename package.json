@@ -24,6 +24,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
+    "react-hot-toast": "^2.5.2",
     "react-router": "7.6.0",
     "react-router-dom": "7.6.0"
   },
@@ -34,7 +35,7 @@
     "@graphql-codegen/cli": "5.0.2",
     "@react-router/dev": "7.6.0",
     "@react-router/fs-routes": "7.6.0",
-    "@shopify/cli": "~3.80.4",
+    "@shopify/cli": "^3.81.0",
     "@shopify/hydrogen-codegen": "^0.3.3",
     "@shopify/mini-oxygen": "^3.2.1",
     "@shopify/oxygen-workers-types": "^4.1.6",
