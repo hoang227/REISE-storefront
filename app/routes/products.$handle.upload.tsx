@@ -168,7 +168,8 @@ export default function ProductUpload() {
   }
 
   const handleContinue = () => {
-    // Save images to session/local storage or your backend
+    // Save images to localStorage
+    localStorage.setItem('uploadedImages', JSON.stringify(uploadedImages))
     navigate(
       `/products/${product.handle}/design${variantSearchParams ? `?${variantSearchParams}` : ''}`
     )
@@ -191,10 +192,10 @@ export default function ProductUpload() {
   }
 
   return (
-    <div className="pb-12 pt-44 sm:pt-36">
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
+    <div className="">
+      <div className="mx-auto max-w-7xl">
         {/** Product Selected */}
-        <div className="mb-5 flex items-center justify-start space-x-5 rounded-lg bg-gray-200 p-3">
+        <div className="mb-8 flex items-center justify-start space-x-5 rounded-lg bg-gray-200 p-3 pb-8 pt-32">
           <div className="h-20">
             <Image
               alt={'Selected Product'}
@@ -218,116 +219,118 @@ export default function ProductUpload() {
           </div>
         </div>
 
-        <div className="mb-5">
-          <h1 className="font-sans text-2xl font-semibold text-black md:text-3xl">
-            Upload Photos
-          </h1>
-          <p className="mt-2 font-sans text-sm text-black/60">
-            Upload the photos you want to include in your photobook. You can
-            rearrange them in the next step.
-          </p>
-          <p className="mt-2 font-sans text-black">
-            ({uploadedImages.length} uploaded)
-          </p>
-        </div>
-
-        {/* Upload Zone */}
-        {uploadedImages.length >= maxImages && (
-          <div className="mb-2 font-sans text-sm text-red-500">
-            Max images uploaded
+        <div className="px-4 md:px-8">
+          <div className="mb-5">
+            <h1 className="font-sans text-2xl font-semibold text-black md:text-3xl">
+              Upload Photos
+            </h1>
+            <p className="mt-2 font-sans text-sm text-black/60">
+              Upload the photos you want to include in your photobook. You can
+              rearrange them in the next step.
+            </p>
+            <p className="mt-2 font-sans text-black">
+              ({uploadedImages.length} uploaded)
+            </p>
           </div>
-        )}
-        {uploadedImages.length < maxImages && (
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                fileInputRef.current?.click()
-              }
-            }}
-            className={cn(
-              'relative mb-8 w-full cursor-pointer rounded-lg border-2 border-dashed p-8 text-center',
-              isDragging
-                ? 'border-black/60 bg-black/5'
-                : 'border-black/20 hover:border-black/40'
-            )}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
-            <Upload className="mx-auto mb-4 h-8 w-8 text-black/40" />
-            <p className="text-md mb-1 font-sans font-medium text-black">
-              {isDragging
-                ? 'Drop your photos here'
-                : 'Drag & drop your photos here'}
-            </p>
-            <p className="font-sans text-sm text-black/60">
-              or click to select files
-            </p>
-          </button>
-        )}
 
-        {/* Image Preview Grid */}
-        <div className="mb-8 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-          {uploadedImages.map((image) => (
-            <div
-              key={image.id}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-black/10 bg-black/5"
-            >
-              <img
-                src={image.preview}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  removeImage(image.id)
-                }}
-                className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              {image.status === 'uploading' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <Loader2 className="h-6 w-6 animate-spin text-white" />
-                </div>
-              )}
-              {image.status === 'error' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <AlertCircle className="h-6 w-6 text-red-500" />
-                </div>
-              )}
+          {/* Upload Zone */}
+          {uploadedImages.length >= maxImages && (
+            <div className="mb-2 font-sans text-sm text-red-500">
+              Max images uploaded
             </div>
-          ))}
-        </div>
+          )}
+          {uploadedImages.length < maxImages && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  fileInputRef.current?.click()
+                }
+              }}
+              className={cn(
+                'relative mb-8 w-full cursor-pointer rounded-lg border-2 border-dashed p-8 text-center',
+                isDragging
+                  ? 'border-black/60 bg-black/5'
+                  : 'border-black/20 hover:border-black/40'
+              )}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => handleFiles(e.target.files)}
+              />
+              <Upload className="mx-auto mb-4 h-8 w-8 text-black/40" />
+              <p className="text-md mb-1 font-sans font-medium text-black">
+                {isDragging
+                  ? 'Drop your photos here'
+                  : 'Drag & drop your photos here'}
+              </p>
+              <p className="font-sans text-sm text-black/60">
+                or click to select files
+              </p>
+            </button>
+          )}
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 rounded-full border border-black/30 px-6 py-3 font-sans text-sm hover:border-black"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span>Back</span>
-          </button>
-          <button
-            onClick={handleContinue}
-            disabled={uploadedImages.length === 0 || isUploading}
-            className="flex items-center gap-2 rounded-full bg-black px-6 py-3 font-sans text-sm text-white transition-colors hover:bg-brand-accent disabled:bg-black/20"
-          >
-            <span>Continue to Design</span>
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          {/* Image Preview Grid */}
+          <div className="mb-8 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+            {uploadedImages.map((image) => (
+              <div
+                key={image.id}
+                className="group relative aspect-square overflow-hidden rounded-lg border border-black/10 bg-black/5"
+              >
+                <img
+                  src={image.preview}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeImage(image.id)
+                  }}
+                  className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                {image.status === 'uploading' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <Loader2 className="h-6 w-6 animate-spin text-white" />
+                  </div>
+                )}
+                {image.status === 'error' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <AlertCircle className="h-6 w-6 text-red-500" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 rounded-full border border-black/30 px-6 py-3 font-sans text-sm hover:border-black"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>Back</span>
+            </button>
+            <button
+              onClick={handleContinue}
+              disabled={uploadedImages.length === 0 || isUploading}
+              className="flex items-center gap-2 rounded-full bg-black px-6 py-3 font-sans text-sm text-white transition-colors hover:bg-brand-accent disabled:bg-black/20"
+            >
+              <span>Continue to Design</span>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
