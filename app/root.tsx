@@ -10,6 +10,7 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteLoaderData,
+  useLocation,
 } from 'react-router'
 import favicon from '~/assets/favicon.svg'
 import NewsletterPopup from './components/newsletter/NewsletterPopup'
@@ -147,6 +148,13 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce()
   const data = useRouteLoaderData<RootLoader>('root')
+  const location = useLocation()
+
+  // Determine layout type based on current route
+  const isUploadOrDesignPage =
+    location.pathname.includes('/upload') ||
+    location.pathname.includes('/design')
+  const layoutType = isUploadOrDesignPage ? 'editor' : 'full'
 
   return (
     <html lang="en">
@@ -167,7 +175,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
             shop={data.shop}
             consent={data.consent}
           >
-            <PageLayout {...data}>
+            <PageLayout {...data} layoutType={layoutType}>
               {children}
               <NewsletterPopup />
             </PageLayout>

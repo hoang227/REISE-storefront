@@ -86,55 +86,56 @@ export default function ProductDesign() {
 
   // Handle continue to cart
   const handleContinue = () => {
-    // TODO: Add to cart functionality
-    console.log('Adding to cart...')
+    // TODO: Review Design
+    console.log('Review Design...')
   }
 
   return (
-    <div className="pb-12">
-      <div className="mx-auto max-w-7xl">
-        <div className="bg-gray-100 px-4 pb-8 pt-36 md:px-8">
-          <h1 className="font-sans text-2xl font-semibold text-black md:text-3xl">
-            Design Your Photobook
-          </h1>
-          <p className="mt-2 font-sans text-sm text-black/60">
-            Arrange your photos and customize your photobook layout.
-          </p>
+    <>
+      {/* Simple header for upload/design pages */}
+      <header className="fixed left-0 right-0 top-0 z-40 border-b border-gray-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handleBack}
+              className="flex items-center space-x-2 text-gray-600 transition-colors hover:text-black"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              <span className="font-sans font-normal">Back to Upload</span>
+            </button>
+          </div>
         </div>
-
-        {/* Design Area */}
-        <div className="mb-8">
+      </header>
+      <div className="flex h-full flex-col">
+        <div className="flex-1 overflow-hidden">
           {uploadedImages.length === 0 ? (
-            <div className="min-h-[400px] rounded-lg border-2 border-black/20 p-8">
-              <p className="text-center font-sans text-lg text-black/60">
-                No images found. Please go back and upload some images.
-              </p>
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <p className="font-sans text-lg text-black/60">
+                  No images found. Please go back and upload some images.
+                </p>
+              </div>
             </div>
           ) : (
             <PhotobookEditor images={uploadedImages} />
           )}
         </div>
 
-        <div className="px-4 md:px-8">
-          {/* Navigation */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 rounded-full border border-black/30 px-6 py-3 font-sans text-sm hover:border-black"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Back to Upload</span>
-            </button>
-            <button
-              onClick={handleContinue}
-              className="flex items-center gap-2 rounded-full bg-black px-6 py-3 font-sans text-sm text-white transition-colors hover:bg-brand-accent"
-            >
-              <span>Add to Cart</span>
-              <ChevronRight className="h-4 w-4" />
-            </button>
+        {/* Fixed Navigation at Bottom */}
+        <div className="border-t border-gray-200 bg-white px-4 py-4 md:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-center justify-end">
+              <button
+                onClick={handleContinue}
+                className="flex items-center gap-2 rounded-full bg-black px-6 py-3 font-sans text-sm text-white transition-colors hover:bg-brand-accent disabled:bg-black/20"
+              >
+                <span>Review Design</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
