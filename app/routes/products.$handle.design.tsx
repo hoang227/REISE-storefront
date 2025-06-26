@@ -29,7 +29,7 @@ export default function ProductDesign() {
     >
   }>()
   const navigate = useNavigate()
-  const [hasCanvasContent, setHasCanvasContent] = useState(false)
+  const [hasUnsavedChange, setHasUnsavedChange] = useState<boolean>(false)
   const [showUnsavedModal, setShowUnsavedModal] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
     null
@@ -46,22 +46,23 @@ export default function ProductDesign() {
   useBeforeUnload(
     useCallback(
       (event) => {
-        if (hasCanvasContent) {
+        if (hasUnsavedChange) {
           event.preventDefault()
         }
       },
-      [hasCanvasContent]
+      [hasUnsavedChange]
     )
   )
 
   // Handle canvas content changes
-  const handleCanvasChange = useCallback((hasContent: boolean) => {
-    setHasCanvasContent(hasContent)
+  const handleCanvasChange = useCallback(() => {
+    console.log('status: edited')
+    setHasUnsavedChange(true)
   }, [])
 
   // Handle back navigation with confirmation
   const handleBack = () => {
-    if (hasCanvasContent) {
+    if (hasUnsavedChange) {
       setShowUnsavedModal(true)
       setPendingNavigation(
         `/products/${product.handle}/upload${variantSearchParams ? `?${variantSearchParams}` : ''}`
@@ -93,7 +94,7 @@ export default function ProductDesign() {
     let isPreventingNavigation = false
 
     const handlePopState = (event: PopStateEvent) => {
-      if (hasCanvasContent && !isPreventingNavigation) {
+      if (hasUnsavedChange && !isPreventingNavigation) {
         isPreventingNavigation = true
 
         // Immediately push state back to prevent navigation
@@ -113,7 +114,7 @@ export default function ProductDesign() {
     }
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (hasCanvasContent) {
+      if (hasUnsavedChange) {
         const message =
           'You have unsaved changes on your canvas. Are you sure you want to leave? Your changes will be lost.'
         event.preventDefault()
@@ -136,7 +137,7 @@ export default function ProductDesign() {
       window.removeEventListener('popstate', handlePopState)
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-  }, [hasCanvasContent, product.handle, variantSearchParams])
+  }, [hasUnsavedChange, product.handle, variantSearchParams])
 
   // Handle continue to cart
   const handleContinue = () => {
@@ -162,7 +163,10 @@ export default function ProductDesign() {
       </header>
       <div className="flex h-full flex-col">
         <div className="flex-1 overflow-hidden">
-          <PhotobookEditor onCanvasChange={handleCanvasChange} />
+          <PhotobookEditor
+            selectedVariant={selectedVariant}
+            onCanvasChange={handleCanvasChange}
+          />
         </div>
 
         {/* Fixed Navigation at Bottom */}
