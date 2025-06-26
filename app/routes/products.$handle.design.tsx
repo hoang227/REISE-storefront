@@ -1,4 +1,3 @@
-import {Image} from '@shopify/hydrogen'
 import {
   useNavigate,
   type MetaFunction,
@@ -7,11 +6,10 @@ import {
 } from 'react-router'
 import {useEffect, useState, useCallback} from 'react'
 import {ChevronLeft, ChevronRight} from 'lucide-react'
-import {cn} from '~/lib/utils'
+import {cn, getMaxPagesFromVariant} from '~/lib/utils'
 import {ProductFragment} from 'storefrontapi.generated'
 import PhotobookEditor from '~/components/editor/PhotobookEditor'
 import {UnsavedChangesModal} from '~/components/UnsavedChangesModal'
-import {useImages} from '~/contexts/ImageContext'
 
 export const meta: MetaFunction = () => {
   return [
@@ -31,7 +29,6 @@ export default function ProductDesign() {
     >
   }>()
   const navigate = useNavigate()
-  const {images, clearImages} = useImages()
   const [hasCanvasContent, setHasCanvasContent] = useState(false)
   const [showUnsavedModal, setShowUnsavedModal] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
@@ -165,10 +162,7 @@ export default function ProductDesign() {
       </header>
       <div className="flex h-full flex-col">
         <div className="flex-1 overflow-hidden">
-          <PhotobookEditor
-            images={images}
-            onCanvasChange={handleCanvasChange}
-          />
+          <PhotobookEditor onCanvasChange={handleCanvasChange} />
         </div>
 
         {/* Fixed Navigation at Bottom */}

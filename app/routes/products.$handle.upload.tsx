@@ -1,11 +1,6 @@
 import {Image} from '@shopify/hydrogen'
-import {
-  useNavigate,
-  type MetaFunction,
-  useOutletContext,
-  useBeforeUnload,
-} from 'react-router'
-import {useState, useRef, useCallback, useEffect} from 'react'
+import {useNavigate, type MetaFunction, useOutletContext} from 'react-router'
+import {useState, useRef, useEffect} from 'react'
 import {
   Upload,
   X,
@@ -40,7 +35,6 @@ export default function ProductUpload() {
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const maxImages = getMaxPagesFromVariant(selectedVariant)
 
   // Search params
   const searchParams = new URLSearchParams()
@@ -82,13 +76,6 @@ export default function ProductUpload() {
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return
-
-    // Check if adding these files would exceed the maximum
-    if (files.length + images.length > maxImages) {
-      alert('Maximum images exceeded.')
-      return
-    }
-
     addImages(files)
   }
 
@@ -185,49 +172,42 @@ export default function ProductUpload() {
               </div>
 
               {/* Upload Zone */}
-              {images.length >= maxImages && (
-                <div className="mb-2 font-sans text-sm text-red-500">
-                  Max images uploaded
-                </div>
-              )}
-              {images.length < maxImages && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      fileInputRef.current?.click()
-                    }
-                  }}
-                  className={cn(
-                    'relative mb-8 w-full cursor-pointer rounded-lg border-2 border-dashed p-8 text-center',
-                    isDragging
-                      ? 'border-black/60 bg-black/5'
-                      : 'border-black/20 hover:border-black/40'
-                  )}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => handleFiles(e.target.files)}
-                  />
-                  <Upload className="mx-auto mb-4 h-8 w-8 text-black/40" />
-                  <p className="text-md mb-1 font-sans font-medium text-black">
-                    {isDragging
-                      ? 'Drop your photos here'
-                      : 'Drag & drop your photos here'}
-                  </p>
-                  <p className="font-sans text-sm text-black/60">
-                    or click to select files
-                  </p>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    fileInputRef.current?.click()
+                  }
+                }}
+                className={cn(
+                  'relative mb-8 w-full cursor-pointer rounded-lg border-2 border-dashed p-8 text-center',
+                  isDragging
+                    ? 'border-black/60 bg-black/5'
+                    : 'border-black/20 hover:border-black/40'
+                )}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handleFiles(e.target.files)}
+                />
+                <Upload className="mx-auto mb-4 h-8 w-8 text-black/40" />
+                <p className="text-md mb-1 font-sans font-medium text-black">
+                  {isDragging
+                    ? 'Drop your photos here'
+                    : 'Drag & drop your photos here'}
+                </p>
+                <p className="font-sans text-sm text-black/60">
+                  or click to select files
+                </p>
+              </button>
 
               {/* Image Preview Grid */}
               <div className="mb-8 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">

@@ -3,19 +3,10 @@
 import {useRef, useEffect, useState} from 'react'
 import {Canvas, Image as FabricImage} from 'fabric/es'
 import {cn} from '~/lib/utils'
-import {
-  Image,
-  Palette,
-  Layout,
-  Settings,
-  RotateCw,
-  Trash,
-  ArrowUp,
-} from 'lucide-react'
-import {UploadedImage} from '~/contexts/ImageContext'
+import {Image, Layout, RotateCw, Trash, ArrowUp} from 'lucide-react'
+import {UploadedImage, useImages} from '~/contexts/ImageContext'
 
 interface PhotobookEditorProps {
-  images: Array<UploadedImage>
   className?: string
   onCanvasChange?: (hasContent: boolean) => void
 }
@@ -23,15 +14,16 @@ interface PhotobookEditorProps {
 type TabType = 'images' | 'templates' | 'elements' | 'settings'
 
 export default function PhotobookEditor({
-  images,
   className,
   onCanvasChange,
 }: PhotobookEditorProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const {images, addImages} = useImages()
   const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(null)
-  const canvasInstanceRef = useRef<Canvas | null>(null)
   const [focusedObjects, setFocusedObjects] = useState<FabricImage[]>([])
   const [activeTab, setActiveTab] = useState<TabType>('images')
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasInstanceRef = useRef<Canvas | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Create canvas
   useEffect(() => {
@@ -199,7 +191,11 @@ export default function PhotobookEditor({
     }
   }
 
-  const handleUploadMoreImages = () => {}
+  const handleFiles = (files: FileList | null) => {
+    if (!files) return
+
+    addImages(files)
+  }
 
   const tabs = [
     {id: 'images' as TabType, label: 'Images', icon: Image},
@@ -212,12 +208,23 @@ export default function PhotobookEditor({
         return (
           <div className="flex flex-col items-center space-y-4 p-4">
             <button
-              onClick={handleUploadMoreImages}
+              onClick={() => fileInputRef.current?.click()}
               className="flex w-full items-center justify-center rounded-full border border-gray-300 py-2 text-sm"
             >
               <h1>Upload More Images</h1>
               <ArrowUp className="ml-2 h-4 w-4" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => handleFiles(e.target.files)}
+              />
             </button>
+            <div className="font-sans text-xs text-gray-500">
+              {images.length} images uploaded
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {images.map((image) => {
                 const isSelected = image.id === selectedImage?.id
