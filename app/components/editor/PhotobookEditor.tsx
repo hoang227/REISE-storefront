@@ -3,16 +3,21 @@
 import {useRef, useEffect, useState} from 'react'
 import {Canvas, Image as FabricImage} from 'fabric/es'
 import {cn} from '~/lib/utils'
-import {Image, Palette, Layout, Settings, RotateCw, Trash} from 'lucide-react'
-
-type ImageData = {
-  id: string
-  preview: string
-}
+import {
+  Image,
+  Palette,
+  Layout,
+  Settings,
+  RotateCw,
+  Trash,
+  ArrowUp,
+} from 'lucide-react'
+import {UploadedImage} from '~/contexts/ImageContext'
 
 interface PhotobookEditorProps {
-  images: Array<ImageData>
+  images: Array<UploadedImage>
   className?: string
+  onCanvasChange?: (hasContent: boolean) => void
 }
 
 type TabType = 'images' | 'templates' | 'elements' | 'settings'
@@ -20,9 +25,10 @@ type TabType = 'images' | 'templates' | 'elements' | 'settings'
 export default function PhotobookEditor({
   images,
   className,
+  onCanvasChange,
 }: PhotobookEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [selectedImage, setSelectedImage] = useState<ImageData | null>(null)
+  const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(null)
   const canvasInstanceRef = useRef<Canvas | null>(null)
   const [focusedObjects, setFocusedObjects] = useState<FabricImage[]>([])
   const [activeTab, setActiveTab] = useState<TabType>('images')
@@ -59,12 +65,41 @@ export default function PhotobookEditor({
       setFocusedObjects([])
     })
 
+    // Add event listeners for canvas changes
+    canvas.on('object:added', () => {
+      const hasContent = canvas.getObjects().length > 0
+      onCanvasChange?.(hasContent)
+    })
+
+    canvas.on('object:removed', () => {
+      const hasContent = canvas.getObjects().length > 0
+      onCanvasChange?.(hasContent)
+    })
+
+    canvas.on('object:modified', () => {
+      const hasContent = canvas.getObjects().length > 0
+      onCanvasChange?.(hasContent)
+    })
+
     return () => {
       canvas.dispose()
     }
-  }, [])
+  }, [images.length, onCanvasChange])
 
-  const handleImageClick = (image: ImageData) => {
+  // Reset canvas state when images change
+  useEffect(() => {
+    if (canvasInstanceRef.current) {
+      // Clear all objects from canvas
+      canvasInstanceRef.current.clear()
+      canvasInstanceRef.current.renderAll()
+      setFocusedObjects([])
+      setSelectedImage(null)
+      // Notify parent that canvas is now empty
+      onCanvasChange?.(false)
+    }
+  }, [images.length, onCanvasChange])
+
+  const handleImageClick = (image: UploadedImage) => {
     setSelectedImage(image.id === selectedImage?.id ? null : {...image})
   }
 
@@ -72,7 +107,7 @@ export default function PhotobookEditor({
     setSelectedImage(null)
   }
 
-  const handleImageFocus = (image: ImageData) => {
+  const handleImageFocus = (image: UploadedImage) => {
     setSelectedImage({...image})
   }
 
@@ -164,6 +199,8 @@ export default function PhotobookEditor({
     }
   }
 
+  const handleUploadMoreImages = () => {}
+
   const tabs = [
     {id: 'images' as TabType, label: 'Images', icon: Image},
     {id: 'templates' as TabType, label: 'Templates', icon: Layout},
@@ -173,8 +210,14 @@ export default function PhotobookEditor({
     switch (activeTab) {
       case 'images':
         return (
-          <div className="p-4">
-            <h3 className="mb-4 text-gray-900">Uploaded Images</h3>
+          <div className="flex flex-col items-center space-y-4 p-4">
+            <button
+              onClick={handleUploadMoreImages}
+              className="flex w-full items-center justify-center rounded-full border border-gray-300 py-2 text-sm"
+            >
+              <h1>Upload More Images</h1>
+              <ArrowUp className="ml-2 h-4 w-4" />
+            </button>
             <div className="grid grid-cols-2 gap-2">
               {images.map((image) => {
                 const isSelected = image.id === selectedImage?.id

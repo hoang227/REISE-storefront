@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import {cn, getMaxPagesFromVariant} from '~/lib/utils'
 import {ProductFragment} from 'storefrontapi.generated'
+import {useImages} from '~/contexts/ImageContext'
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,15 +28,6 @@ export const meta: MetaFunction = () => {
   ]
 }
 
-type UploadedImage = {
-  id: string
-  file: File
-  preview: string
-  status: 'uploading' | 'complete' | 'error'
-  progress?: number
-  error?: string
-}
-
 export default function ProductUpload() {
   const {product, selectedVariant} = useOutletContext<{
     product: ProductFragment
@@ -44,7 +36,7 @@ export default function ProductUpload() {
     >
   }>()
   const navigate = useNavigate()
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([])
+  const {images, addImages, removeImage, clearImages} = useImages()
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -57,88 +49,47 @@ export default function ProductUpload() {
   })
   const variantSearchParams = searchParams.toString()
 
-  // Alert user when they refresh pages if there's any images uploaded
-  useBeforeUnload(
-    useCallback(
-      (event) => {
-        if (uploadedImages.length > 0) {
-          event.preventDefault()
-        }
-      },
-      [uploadedImages]
-    )
-  )
-
-  // Block navigation when there are uploaded images
+  // Handle browser navigation (back/forward buttons, swipe gestures)
   useEffect(() => {
-    if (!uploadedImages.length) return
-
-    // Add a history entry without changing the URL
-    window.history.pushState(null, document.title, window.location.href)
-
-    // Handle back/forward button clicks
-    function handlePopState(event: PopStateEvent) {
-      // Check if trying to navigate to design page
-      const currentPath = window.location.pathname
-      const isNavigatingToDesign = currentPath.includes('/design')
-
-      if (isNavigatingToDesign) {
-        // Allow navigation to design page
-        return
-      }
-
-      // Prevent navigation for other cases
-      event.preventDefault()
-      window.history.pushState(null, document.title, window.location.href)
-
-      // Show a confirmation dialog
-      const shouldLeave = window.confirm(
-        'You have uploaded images. Are you sure you want to leave? Your uploads will be lost.'
-      )
-
-      if (shouldLeave) {
-        // If user confirms, navigate using the router
+    const handlePopState = (event: PopStateEvent) => {
+      // If there are uploaded images, block all backward navigation
+      if (images.length > 0) {
+        // Block the navigation and redirect to product page
+        event.preventDefault()
         navigate(
           `/products/${product.handle}${variantSearchParams ? `?${variantSearchParams}` : ''}`
         )
+        return
       }
+
+      // No images, allow navigation but clear any remaining state
+      clearImages()
     }
 
     // Add event listener
     window.addEventListener('popstate', handlePopState)
 
-    // Cleanup function to remove event listener
     return () => {
       window.removeEventListener('popstate', handlePopState)
     }
   }, [
-    uploadedImages,
+    images.length,
+    clearImages,
     navigate,
     product.handle,
-    selectedVariant.selectedOptions,
     variantSearchParams,
   ])
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return
 
-    // Create new image entries
-    const newImages = Array.from(files).map((file) => ({
-      id: crypto.randomUUID(),
-      file,
-      preview: URL.createObjectURL(file),
-      status: 'complete' as const,
-      progress: 100,
-    }))
+    // Check if adding these files would exceed the maximum
+    if (files.length + images.length > maxImages) {
+      alert('Maximum images exceeded.')
+      return
+    }
 
-    setUploadedImages((prev) => {
-      if (newImages.length + prev.length > maxImages) {
-        alert('Maximum images exceeded.')
-        return prev
-      } else {
-        return [...prev, ...newImages]
-      }
-    })
+    addImages(files)
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -157,19 +108,7 @@ export default function ProductUpload() {
     handleFiles(e.dataTransfer.files)
   }
 
-  const removeImage = (id: string) => {
-    setUploadedImages((prev) => {
-      const imageToRemove = prev.find((img) => img.id === id)
-      if (imageToRemove) {
-        URL.revokeObjectURL(imageToRemove.preview)
-      }
-      return prev.filter((img) => img.id !== id)
-    })
-  }
-
   const handleContinue = () => {
-    // Save images to localStorage
-    localStorage.setItem('uploadedImages', JSON.stringify(uploadedImages))
     navigate(
       `/products/${product.handle}/design${variantSearchParams ? `?${variantSearchParams}` : ''}`
     )
@@ -177,15 +116,9 @@ export default function ProductUpload() {
 
   // Handle back navigation with confirmation
   const handleBack = () => {
-    if (uploadedImages.length > 0) {
-      const shouldLeave = window.confirm(
-        'You have uploaded images. Are you sure you want to leave? Your uploads will be lost.'
-      )
-      if (!shouldLeave) {
-        return
-      }
+    if (images.length > 0) {
+      clearImages()
     }
-
     navigate(
       `/products/${product.handle}${variantSearchParams ? `?${variantSearchParams}` : ''}`
     )
@@ -247,17 +180,17 @@ export default function ProductUpload() {
                   can rearrange them in the next step.
                 </p>
                 <p className="mt-2 font-sans text-black">
-                  ({uploadedImages.length} uploaded)
+                  ({images.length} uploaded)
                 </p>
               </div>
 
               {/* Upload Zone */}
-              {uploadedImages.length >= maxImages && (
+              {images.length >= maxImages && (
                 <div className="mb-2 font-sans text-sm text-red-500">
                   Max images uploaded
                 </div>
               )}
-              {uploadedImages.length < maxImages && (
+              {images.length < maxImages && (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -298,7 +231,7 @@ export default function ProductUpload() {
 
               {/* Image Preview Grid */}
               <div className="mb-8 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-                {uploadedImages.map((image) => (
+                {images.map((image) => (
                   <div
                     key={image.id}
                     className="group relative aspect-square overflow-hidden rounded-lg bg-black/5 shadow-sm"
@@ -340,7 +273,7 @@ export default function ProductUpload() {
             <div className="flex items-center justify-end">
               <button
                 onClick={handleContinue}
-                disabled={uploadedImages.length === 0 || isUploading}
+                disabled={images.length === 0 || isUploading}
                 className="flex items-center gap-2 rounded-full bg-black px-6 py-3 font-sans text-sm text-white transition-colors hover:bg-brand-accent disabled:bg-black/20"
               >
                 <span>Continue to Design</span>

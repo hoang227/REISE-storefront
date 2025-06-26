@@ -20,6 +20,9 @@ import appStyles from '~/styles/app.css?url'
 import tailwindCss from '~/styles/tailwind.css?url'
 import fontsStyles from '~/styles/fonts.css?url'
 import {PageLayout} from './components/PageLayout'
+import {ImageProvider} from './contexts/ImageContext'
+import {useEffect, useState} from 'react'
+import {LoadingPage} from './components/LoadingPage'
 
 export type RootLoader = typeof loader
 
@@ -149,12 +152,24 @@ export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce()
   const data = useRouteLoaderData<RootLoader>('root')
   const location = useLocation()
+  const [isLoading, setIsLoading] = useState(false)
 
   // Determine layout type based on current route
   const isUploadOrDesignPage =
     location.pathname.includes('/upload') ||
     location.pathname.includes('/design')
   const layoutType = isUploadOrDesignPage ? 'editor' : 'full'
+
+  // Show loading page only when navigating to upload or design pages
+  useEffect(() => {
+    if (isUploadOrDesignPage) {
+      setIsLoading(true)
+    }
+  }, [location.pathname, isUploadOrDesignPage])
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false)
+  }
 
   return (
     <html lang="en">
@@ -169,16 +184,19 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <Links />
       </head>
       <body>
+        {isLoading && <LoadingPage onComplete={handleLoadingComplete} />}
         {data ? (
           <Analytics.Provider
             cart={data.cart}
             shop={data.shop}
             consent={data.consent}
           >
-            <PageLayout {...data} layoutType={layoutType}>
-              {children}
-              <NewsletterPopup />
-            </PageLayout>
+            <ImageProvider>
+              <PageLayout {...data} layoutType={layoutType}>
+                {children}
+                <NewsletterPopup />
+              </PageLayout>
+            </ImageProvider>
           </Analytics.Provider>
         ) : (
           children
