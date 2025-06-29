@@ -1,189 +1,174 @@
-import {useState, useEffect, useRef, useCallback} from 'react'
-import {Canvas, Text} from 'fabric/es'
-import type {ProductFragment} from 'storefrontapi.generated'
+import {useState, useCallback, useEffect} from 'react'
+import {Canvas} from 'fabric/es'
 import {getNumberOfPagesFromVariant} from '~/lib/utils'
-
-// Define the structure of a single page
-export interface PageState {
-  id: string
-  pageNumber: number
-  canvasData: string | null // JSON serialized canvas state
-  lastModified: number
-}
+import type {ProductFragment} from 'storefrontapi.generated'
 
 export function usePageManagement(
   selectedVariant: NonNullable<
     ProductFragment['selectedOrFirstAvailableVariant']
   >,
   canvasInstanceRef: React.MutableRefObject<Canvas | null>,
-  onCanvasChange: () => void
+  onCanvasChange: () => void,
+  selectedTemplate?: any // Add selectedTemplate parameter
 ) {
-  const [pages, setPages] = useState<PageState[]>([])
+  const [pages, setPages] = useState<string[]>([])
   const [currentPageIndex, setCurrentPageIndex] = useState(0)
+  const [pageContent, setPageContent] = useState<Map<number, any>>(new Map())
 
-  // Calculate number of pages from variant
-  const numberOfPages = getNumberOfPagesFromVariant(selectedVariant)
-
-  // Initialize pages based on product variant
-  useEffect(() => {
-    if (pages.length === 0 && numberOfPages > 0) {
-      const initialPages: PageState[] = []
-
-      initialPages.push({
-        id: 'front-cover',
-        pageNumber: 0,
-        canvasData: null,
-        lastModified: Date.now(),
-      })
-
-      for (let i = 1; i <= numberOfPages; i++) {
-        initialPages.push({
-          id: `page-${i}`,
-          pageNumber: i,
-          canvasData: null,
-          lastModified: Date.now(),
-        })
-      }
-
-      initialPages.push({
-        id: 'back-cover',
-        pageNumber: numberOfPages + 1,
-        canvasData: null,
-        lastModified: Date.now(),
-      })
-
-      setPages(initialPages)
-      setCurrentPageIndex(0) // Start on first page
+  // Calculate number of pages from variant or template
+  const calculateNumberOfPages = useCallback(() => {
+    // If we have a selected template, use its page count
+    if (selectedTemplate && selectedTemplate.pages) {
+      console.log(
+        `📚 Using template page count: ${selectedTemplate.pages.length} pages`
+      )
+      return selectedTemplate.pages.length
     }
-  }, [pages.length, numberOfPages])
 
-  // Function to load page data into canvas
-  const loadPageIntoCanvas = useCallback(
+    // Otherwise, try to get from variant
+    const variantPages = getNumberOfPagesFromVariant(selectedVariant)
+    console.log(`📚 Using variant page count: ${variantPages} pages`)
+    return variantPages
+  }, [selectedVariant, selectedTemplate])
+
+  // Save current page content
+  const saveCurrentPageContent = useCallback(() => {
+    if (!canvasInstanceRef.current) return
+
+    const canvas = canvasInstanceRef.current
+    const canvasData = canvas.toJSON()
+
+    setPageContent((prev) => {
+      const newMap = new Map(prev)
+      newMap.set(currentPageIndex, canvasData)
+      return newMap
+    })
+
+    console.log(`💾 Saved content for page ${currentPageIndex + 1}`)
+  }, [canvasInstanceRef, currentPageIndex])
+
+  // Restore page content
+  const restorePageContent = useCallback(
     (pageIndex: number) => {
-      if (
-        !canvasInstanceRef.current ||
-        pageIndex < 0 ||
-        pageIndex >= pages.length
-      ) {
-        return
-      }
+      if (!canvasInstanceRef.current) return
 
-      const page = pages[pageIndex]
+      const canvas = canvasInstanceRef.current
+      const savedContent = pageContent.get(pageIndex)
 
-      // Clear current canvas
-      canvasInstanceRef.current.clear()
-
-      // Load page data if it exists
-      if (page.canvasData) {
-        try {
-          const canvasData = JSON.parse(page.canvasData) as Record<string, any>
-          canvasInstanceRef.current.loadFromJSON(canvasData, () => {
-            if (canvasInstanceRef.current) {
-              // Force a complete re-render
-              canvasInstanceRef.current.renderAll()
-              canvasInstanceRef.current.requestRenderAll()
-
-              // Update canvas change state
-              const hasContent =
-                canvasInstanceRef.current.getObjects().length > 0
-              onCanvasChange()
-            }
-          })
-        } catch (error) {
-          console.error('Error loading page data:', error)
-          // If loading fails, just render empty canvas
-          canvasInstanceRef.current.renderAll()
+      if (savedContent) {
+        canvas.loadFromJSON(savedContent, () => {
+          canvas.renderAll()
           onCanvasChange()
-        }
+
+          // Force re-render
+          requestAnimationFrame(() => {
+            canvas.renderAll()
+            canvas.fire('object:added')
+          })
+
+          console.log(`📄 Restored content for page ${pageIndex + 1}`)
+        })
       } else {
-        // Empty page - add default text for covers
-        if (pageIndex === 0) {
-          // Front cover
-          const frontCoverText = new Text('Front Cover', {
-            left: 375, // Center of 750px width
-            top: 275, // Center of 550px height
-            fontSize: 48,
-            fontFamily: 'Arial',
-            fill: '#333333',
-            selectable: true,
-            originX: 'center',
-            originY: 'center',
-          })
-          canvasInstanceRef.current.add(frontCoverText)
-        } else if (pageIndex === pages.length - 1) {
-          // Back cover
-          const backCoverText = new Text('Back Cover', {
-            left: 375, // Center of 750px width
-            top: 275, // Center of 550px height
-            fontSize: 48,
-            fontFamily: 'Arial',
-            fill: '#333333',
-            selectable: true,
-            originX: 'center',
-            originY: 'center',
-          })
-          canvasInstanceRef.current.add(backCoverText)
-        }
-
-        canvasInstanceRef.current.renderAll()
+        // No saved content, clear canvas
+        canvas.clear()
+        canvas.renderAll()
         onCanvasChange()
-      }
 
-      // Clear selection state after a short delay to ensure rendering is complete
-      setTimeout(() => {
-        if (canvasInstanceRef.current) {
-          canvasInstanceRef.current.discardActiveObject()
-          canvasInstanceRef.current.renderAll()
-        }
-      }, 50)
+        // Force re-render
+        requestAnimationFrame(() => {
+          canvas.renderAll()
+          canvas.fire('object:removed')
+        })
+
+        console.log(
+          `📄 No saved content for page ${pageIndex + 1}, cleared canvas`
+        )
+      }
     },
-    [canvasInstanceRef, pages, onCanvasChange]
+    [canvasInstanceRef, pageContent, onCanvasChange]
   )
 
-  // Load page data when current page changes
+  // Initialize pages when variant or template changes
   useEffect(() => {
-    if (pages.length > 0 && canvasInstanceRef.current) {
-      loadPageIntoCanvas(currentPageIndex)
+    const numPages = calculateNumberOfPages()
+
+    if (numPages > 0) {
+      // Create array of page indices (0-based)
+      const pageArray = Array.from({length: numPages}, (_, i) => `page-${i}`)
+      console.log(`📄 Initializing ${numPages} pages:`, pageArray)
+      setPages(pageArray)
+    } else {
+      console.warn('⚠️  No pages found, using default 12 pages')
+      const defaultPages = Array.from({length: 12}, (_, i) => `page-${i}`)
+      setPages(defaultPages)
     }
-  }, [currentPageIndex, pages.length, canvasInstanceRef, loadPageIntoCanvas])
+  }, [selectedVariant, selectedTemplate, calculateNumberOfPages])
 
-  // Function to save current page state
-  const saveCurrentPage = () => {
-    if (!canvasInstanceRef.current || pages.length === 0) return
-
-    const canvasData = JSON.stringify(canvasInstanceRef.current.toJSON())
-    const updatedPages = [...pages]
-    updatedPages[currentPageIndex] = {
-      ...updatedPages[currentPageIndex],
-      canvasData,
-      lastModified: Date.now(),
+  // Handle page index bounds separately
+  useEffect(() => {
+    if (pages.length > 0 && currentPageIndex >= pages.length) {
+      setCurrentPageIndex(0)
     }
-    setPages(updatedPages)
-  }
+  }, [currentPageIndex, pages.length])
 
-  // Function to switch to a different page
-  const switchToPage = (newPageIndex: number) => {
-    if (
-      newPageIndex === currentPageIndex ||
-      newPageIndex < 0 ||
-      newPageIndex >= pages.length
-    ) {
-      return
-    }
+  // Switch to a specific page
+  const switchToPage = useCallback(
+    (pageIndex: number) => {
+      if (pageIndex >= 0 && pageIndex < pages.length) {
+        console.log(`🔄 Switching to page ${pageIndex + 1} of ${pages.length}`)
 
-    // Save current page before switching
-    saveCurrentPage()
+        // Save current page content before switching
+        saveCurrentPageContent()
 
-    // Switch to new page
-    setCurrentPageIndex(newPageIndex)
-  }
+        // Update page index
+        setCurrentPageIndex(pageIndex)
+
+        // Only restore content if it exists (don't restore empty content for uninitialized pages)
+        const hasSavedContent = pageContent.has(pageIndex)
+        if (hasSavedContent) {
+          setTimeout(() => {
+            restorePageContent(pageIndex)
+          }, 0)
+        } else {
+          console.log(
+            `📄 Page ${pageIndex + 1} has no saved content, waiting for template application`
+          )
+        }
+
+        onCanvasChange()
+      } else {
+        console.warn(
+          `⚠️  Invalid page index: ${pageIndex}, max: ${pages.length - 1}`
+        )
+      }
+    },
+    [
+      pages.length,
+      onCanvasChange,
+      saveCurrentPageContent,
+      restorePageContent,
+      pageContent,
+    ]
+  )
+
+  // Get current page number (1-based for display)
+  const getCurrentPageNumber = useCallback(() => {
+    return currentPageIndex + 1
+  }, [currentPageIndex])
+
+  // Get total number of pages
+  const getTotalPages = useCallback(() => {
+    return pages.length
+  }, [pages.length])
 
   return {
     pages,
     currentPageIndex,
-    numberOfPages,
-    saveCurrentPage,
+    currentPageNumber: getCurrentPageNumber(),
+    totalPages: getTotalPages(),
     switchToPage,
-    loadPageIntoCanvas,
+    saveCurrentPageContent,
+    hasNextPage: currentPageIndex < pages.length - 1,
+    hasPreviousPage: currentPageIndex > 0,
   }
 }

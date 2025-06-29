@@ -10,6 +10,7 @@ import {cn, getMaxPagesFromVariant} from '~/lib/utils'
 import {ProductFragment} from 'storefrontapi.generated'
 import PhotobookEditor from '~/components/editor/PhotobookEditor'
 import {UnsavedChangesModal} from '~/components/UnsavedChangesModal'
+import {getTemplateForVariant} from '~/lib/templates'
 
 export const meta: MetaFunction = () => {
   return [
@@ -35,6 +36,11 @@ export default function ProductDesign() {
     null
   )
 
+  // Determine template based on selected variant
+  const selectedTemplate = getTemplateForVariant(
+    selectedVariant.selectedOptions
+  )
+
   // Search params
   const searchParams = new URLSearchParams()
   selectedVariant.selectedOptions.forEach((option) => {
@@ -56,7 +62,6 @@ export default function ProductDesign() {
 
   // Handle canvas content changes
   const handleCanvasChange = useCallback(() => {
-    console.log('status: edited')
     setHasUnsavedChange(true)
   }, [])
 
@@ -166,6 +171,7 @@ export default function ProductDesign() {
           <PhotobookEditor
             selectedVariant={selectedVariant}
             onCanvasChange={handleCanvasChange}
+            preSelectedTemplate={selectedTemplate}
           />
         </div>
 
