@@ -2,7 +2,7 @@ import {Form} from 'react-router'
 
 const NewsletterSection = () => {
   return (
-    <section className="bg-brand-accent px-4 py-24 text-white">
+    <section className="bg-black px-4 py-14 text-white">
       <div className="container mx-auto">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="mb-4 font-sans text-4xl">Join Our Community</h2>
@@ -18,7 +18,7 @@ const NewsletterSection = () => {
             />
             <button
               type="submit"
-              className="rounded bg-black px-8 py-3 font-sans font-normal text-white transition-colors hover:bg-gray-800"
+              className="rounded bg-brand-accent px-8 py-3 font-sans font-normal text-white transition-colors hover:bg-white hover:text-brand-accent"
             >
               Subscribe
             </button>

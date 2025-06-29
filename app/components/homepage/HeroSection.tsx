@@ -37,13 +37,9 @@ const HeroSection = () => {
             Turning life&apos;s beautiful mess into something meaningful
           </p>
           <div className="flex justify-center space-x-6">
-            <div className={aboutButtonStyles}>
-              <Link to="/pages/about-us">About Us</Link>
-            </div>
-
-            <div className={shopButtonStyles}>
-              <Link to="/collections/all">Shop Now</Link>
-            </div>
+            <Link className={shopButtonStyles} to="/collections/all">
+              Shop Now
+            </Link>
           </div>
         </div>
       </div>

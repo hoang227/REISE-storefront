@@ -1,5 +1,6 @@
 import {redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen'
 import {useLoaderData, type MetaFunction} from 'react-router'
+import {Outlet, useLocation} from 'react-router'
 import {
   getSelectedProductOptions,
   Analytics,
@@ -7,11 +8,15 @@ import {
   getProductOptions,
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
+  RichText,
 } from '@shopify/hydrogen'
-import {ProductPrice} from '~/components/ProductPrice'
-import {ProductImage} from '~/components/ProductImage'
-import {ProductForm} from '~/components/ProductForm'
+import {ProductPrice} from '~/components/product/ProductPrice'
+import {GalleryImage, ProductImage} from '~/components/product/ProductImage'
+import {ProductForm} from '~/components/product/ProductForm'
 import {redirectIfHandleIsLocalized} from '~/lib/redirect'
+import ProductImageCarousel from '~/components/product/ProductImageCarousel'
+import ProductInfo from '~/components/product/ProductInfo'
+import ProductOptions from '~/components/product/ProductOptions'
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [
@@ -85,6 +90,7 @@ function loadDeferredData({context, params}: LoaderFunctionArgs) {
 
 export default function Product() {
   const {product} = useLoaderData<typeof loader>()
+  const location = useLocation()
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -102,30 +108,34 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   })
 
-  const {title, descriptionHtml} = product
+  // If we're on a nested route (upload or design), render the Outlet
+  if (
+    location.pathname.includes('/upload') ||
+    location.pathname.includes('/design')
+  ) {
+    return <Outlet context={{product, selectedVariant}} />
+  }
 
+  // Otherwise render the product page
   return (
-    <div className="product">
-      <ProductImage image={selectedVariant?.image} />
-      <div className="product-main">
-        <h1>{title}</h1>
-        <ProductPrice
-          price={selectedVariant?.price}
-          compareAtPrice={selectedVariant?.compareAtPrice}
-        />
-        <br />
-        <ProductForm
-          productOptions={productOptions}
-          selectedVariant={selectedVariant}
-        />
-        <br />
-        <br />
-        <p>
-          <strong>Description</strong>
-        </p>
-        <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-        <br />
+    <div className="pb-12 pt-44 sm:pt-36">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+          {/** Left side - Image Carousel */}
+          <ProductImageCarousel
+            product={product}
+            selectedVariant={selectedVariant}
+          />
+
+          {/** Right side - Details & CTA */}
+          <div className="h-fit space-y-5 rounded border-[1.5px] border-black/30 p-6">
+            <ProductInfo product={product} selectedVariant={selectedVariant} />
+
+            <ProductOptions productOptions={productOptions} />
+
+            <ProductForm selectedVariant={selectedVariant} product={product} />
+          </div>
+        </div>
       </div>
       <Analytics.ProductView
         data={{
@@ -228,6 +238,9 @@ const PRODUCT_FRAGMENT = `#graphql
     seo {
       description
       title
+    }
+    material: metafield(namespace: "product", key: "material") {
+      value
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}

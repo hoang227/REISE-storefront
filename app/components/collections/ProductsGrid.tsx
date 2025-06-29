@@ -1,5 +1,5 @@
 import {PaginatedResourceSection} from '../PaginatedResourceSection'
-import ProductItem from '../ProductItem'
+import ProductItem from '../product/ProductItem'
 import type {
   CollectionQuery,
   CollectionItemFragment,

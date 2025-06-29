@@ -12,7 +12,9 @@ import {HeaderProps} from './Header'
 import {Search, ShoppingBag, User} from 'lucide-react'
 import {cn} from '~/lib/utils'
 
-type HeaderCtasProps = Pick<HeaderProps, 'isLoggedIn' | 'cart'>
+type HeaderCtasProps = {
+  cart: Promise<CartApiQueryFragment | null>
+}
 
 const underlineAnimation = cn(
   // Base styles
@@ -34,7 +36,7 @@ const underlineAnimation = cn(
   'hover:after:w-full'
 )
 
-const HeaderCtas = ({isLoggedIn, cart}: HeaderCtasProps) => {
+const HeaderCtas = ({cart}: HeaderCtasProps) => {
   return (
     <nav
       className="flex items-center space-x-2 sm:space-x-3 lg:space-x-8"
@@ -82,7 +84,7 @@ function CartBadge({count}: {count: number | null}) {
           className={cn(
             'absolute right-1 top-1 h-4 w-4',
             'flex items-center justify-center',
-            'bg-brand-accent rounded-full',
+            'rounded-full bg-brand-accent',
             'text-[10px] font-medium text-white'
           )}
         >

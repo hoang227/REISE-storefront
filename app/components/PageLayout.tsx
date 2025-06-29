@@ -6,7 +6,7 @@ import type {
   HeaderQuery,
 } from 'storefrontapi.generated'
 import Aside from '~/components/Aside'
-import {Footer} from '~/components/Footer'
+import {Footer} from '~/components/footer/Footer'
 import {Header} from '~/components/header/Header'
 import HeaderMenu from './header/HeaderMenu'
 import {CartMain} from '~/components/CartMain'
@@ -15,6 +15,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive'
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive'
+import {EditorLayout} from './EditorLayout'
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>
@@ -23,6 +24,7 @@ interface PageLayoutProps {
   isLoggedIn: Promise<boolean>
   publicStoreDomain: string
   children?: React.ReactNode
+  layoutType?: 'full' | 'editor'
 }
 
 export function PageLayout({
@@ -32,7 +34,14 @@ export function PageLayout({
   header,
   isLoggedIn,
   publicStoreDomain,
+  layoutType = 'full',
 }: PageLayoutProps) {
+  // For editor layout (upload/design pages), use the EditorLayout component
+  if (layoutType === 'editor') {
+    return <EditorLayout cart={cart}>{children}</EditorLayout>
+  }
+
+  // Full layout (default) - includes header, footer, and all asides
   return (
     <Aside.Provider>
       <CartAside cart={cart} />

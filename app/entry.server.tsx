@@ -1,9 +1,9 @@
-import type { AppLoadContext } from '@shopify/remix-oxygen'
-import { ServerRouter } from 'react-router'
-import { isbot } from 'isbot'
-import { renderToReadableStream } from 'react-dom/server'
-import { createContentSecurityPolicy } from '@shopify/hydrogen'
-import type { EntryContext } from 'react-router'
+import type {AppLoadContext} from '@shopify/remix-oxygen'
+import {ServerRouter} from 'react-router'
+import {isbot} from 'isbot'
+import {renderToReadableStream} from 'react-dom/server'
+import {createContentSecurityPolicy} from '@shopify/hydrogen'
+import type {EntryContext} from 'react-router'
 
 export default async function handleRequest(
   request: Request,
@@ -12,11 +12,12 @@ export default async function handleRequest(
   reactRouterContext: EntryContext,
   context: AppLoadContext
 ) {
-  const { nonce, header, NonceProvider } = createContentSecurityPolicy({
+  const {nonce, header, NonceProvider} = createContentSecurityPolicy({
     shop: {
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    imgSrc: ["'self'", 'data:', 'blob:', '*.shopify.com', '*.myshopify.com'],
   })
 
   const body = await renderToReadableStream(
