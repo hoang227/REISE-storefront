@@ -18,6 +18,7 @@
     "attr-accept": "^2.2.5",
     "fabric": "^6.7.0",
     "file-selector": "^2.1.2",
+    "fontfaceobserver": "^2.3.0",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
     "isbot": "^5.1.22",

@@ -1,7 +1,6 @@
 import {Image, Type} from 'lucide-react'
 import {UploadedImage} from '~/contexts/ImageContext'
 import {ImagesTab} from './tabs/ImagesTab'
-import {TextTab} from './tabs/TextTab'
 import {TabNavigation} from './TabNavigation'
 
 export type TabType = 'images' | 'text' | 'settings'
@@ -31,16 +30,8 @@ export function SidebarTabs({
   handleImageFocus,
   handleFiles,
   fileInputRef,
-  currentPageTemplate,
-  selectedInput,
-  handleInputClick,
-  handleInputUpdate,
-  getTextFromInput,
 }: SidebarTabsProps) {
-  const tabs = [
-    {id: 'images' as TabType, label: 'Images', icon: Image},
-    {id: 'text' as TabType, label: 'Text', icon: Type},
-  ]
+  const tabs = [{id: 'images' as TabType, label: 'Images', icon: Image}]
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -55,29 +46,19 @@ export function SidebarTabs({
             fileInputRef={fileInputRef}
           />
         )
-      case 'text':
-        return (
-          <TextTab
-            currentPageTemplate={currentPageTemplate}
-            selectedInput={selectedInput}
-            handleInputClick={handleInputClick}
-            handleInputUpdate={handleInputUpdate}
-            getTextFromInput={getTextFromInput}
-          />
-        )
       default:
         return null
     }
   }
 
   return (
-    <div className="flex w-[380px] border-r border-gray-200 bg-white">
-      <TabNavigation
+    <div className="flex h-full border-r border-gray-200 bg-white">
+      {/* <TabNavigation
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-      />
-      <div className="w-[300px] overflow-y-auto">{renderTabContent()}</div>
+      /> */}
+      <div className="overflow-y-auto">{renderTabContent()}</div>
     </div>
   )
 }

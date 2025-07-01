@@ -8,6 +8,7 @@ import {useCanvasManagement} from '~/hooks/useCanvasManagement'
 import {useTemplateManagement} from '~/hooks/useTemplateManagement'
 import {PhotobookTemplate} from '~/lib/templates'
 import {useThumbnailManagement} from '~/hooks/useThumbnailManagement'
+
 import {SidebarTabs, TabType} from './SidebarTabs'
 import {CanvasToolbar} from './CanvasToolbar'
 import {MainCanvas} from './MainCanvas'
@@ -28,6 +29,7 @@ export default function PhotobookEditor({
   onCanvasChange,
   preSelectedTemplate,
 }: PhotobookEditorProps) {
+  // All hooks
   const {images, addImages} = useImages()
   const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(null)
   const [activeTab, setActiveTab] = useState<TabType>('images')
@@ -43,9 +45,10 @@ export default function PhotobookEditor({
   const {
     canvasRef,
     canvasInstanceRef,
-    focusedObjects,
+    focusedObject,
     handleTrashClick,
     handleRotateClick,
+    handleResetClick,
     handleDragOver,
     handleClickToAddImage,
     handleDrop,
@@ -55,16 +58,10 @@ export default function PhotobookEditor({
   const {
     selectedTemplate,
     currentPageTemplate,
-    getAllAvailableTemplates,
-    getTemplatesByCategoryFiltered,
     initializeTemplate,
     initializeTemplateFromVariant,
-    applyTemplateToPage,
     applyTemplateToPageIndex,
-    getCurrentPageTemplate,
     canAddImageToSpot,
-    getImageSpotById,
-    getTextAreaById,
     addImageToSpot,
     updateTextInArea,
     getTextFromArea,
@@ -72,14 +69,7 @@ export default function PhotobookEditor({
     canvasInstanceRef,
     onCanvasChange,
     undefined,
-    selectedVariant,
-    () => {
-      // Save content immediately after template is applied
-      console.log(
-        `💾 Template applied, saving content for page ${currentPageIndex + 1}`
-      )
-      saveCurrentPageContent()
-    }
+    selectedVariant
   )
 
   // Page management hook (after template management)
@@ -98,6 +88,55 @@ export default function PhotobookEditor({
     pages,
     selectedTemplate,
   })
+
+  // Template initialization
+  useEffect(() => {
+    if (preSelectedTemplate && !selectedTemplate) {
+      initializeTemplate(preSelectedTemplate)
+    } else if (selectedVariant && !selectedTemplate) {
+      // Generate template from variant if no pre-selected template
+      initializeTemplateFromVariant(selectedVariant)
+    }
+  }, [
+    preSelectedTemplate,
+    selectedTemplate,
+    selectedVariant,
+    initializeTemplate,
+    initializeTemplateFromVariant,
+  ])
+
+  // Apply template to current page if not already initialized
+  useEffect(() => {
+    if (
+      selectedTemplate &&
+      pages.length > 0 &&
+      !initializedPages.has(currentPageIndex)
+    ) {
+      // Apply template first
+      applyTemplateToPageIndex(currentPageIndex, pages.length)
+
+      // Mark as initialized
+      setInitializedPages((prev) => new Set([...prev, currentPageIndex]))
+    }
+  }, [
+    selectedTemplate,
+    pages.length,
+    currentPageIndex,
+    initializedPages,
+    applyTemplateToPageIndex,
+  ])
+
+  // Save content after template is applied
+  useEffect(() => {
+    if (initializedPages.has(currentPageIndex) && saveCurrentPageContent) {
+      // Small delay to ensure template is fully applied
+      const timer = setTimeout(() => {
+        saveCurrentPageContent()
+      }, 100)
+
+      return () => clearTimeout(timer)
+    }
+  }, [currentPageIndex, initializedPages, saveCurrentPageContent])
 
   // Handlers for sidebar
   const handleImageClick = (image: UploadedImage) => {
@@ -123,74 +162,36 @@ export default function PhotobookEditor({
     setSelectedInput(null)
   }
 
-  // Template initialization
-  useEffect(() => {
-    if (preSelectedTemplate && !selectedTemplate) {
-      initializeTemplate(preSelectedTemplate)
-    } else if (selectedVariant && !selectedTemplate) {
-      // Generate template from variant if no pre-selected template
-      initializeTemplateFromVariant(selectedVariant)
-    }
-  }, [
-    preSelectedTemplate,
-    selectedTemplate,
-    selectedVariant,
-    initializeTemplate,
-    initializeTemplateFromVariant,
-  ])
-
-  // Apply template to current page if not already initialized
-  useEffect(() => {
-    if (
-      selectedTemplate &&
-      pages.length > 0 &&
-      !initializedPages.has(currentPageIndex)
-    ) {
-      console.log(
-        `📄 Applying template to page ${currentPageIndex + 1} (first visit)`
-      )
-
-      // Apply template first
-      applyTemplateToPageIndex(currentPageIndex, pages.length)
-
-      // Mark as initialized
-      setInitializedPages((prev) => new Set([...prev, currentPageIndex]))
-    }
-  }, [
-    selectedTemplate,
-    pages.length,
-    currentPageIndex,
-    initializedPages,
-    applyTemplateToPageIndex,
-  ])
-
   return (
     <div className="flex h-full overflow-x-auto">
       {/* Sidebar */}
-      <SidebarTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        images={images}
-        selectedImage={selectedImage}
-        handleImageClick={handleImageClick}
-        handleImageFocus={handleImageFocus}
-        handleFiles={handleFiles}
-        fileInputRef={fileInputRef}
-        currentPageTemplate={currentPageTemplate}
-        selectedInput={selectedInput}
-        handleInputClick={handleInputClick}
-        handleInputUpdate={handleInputUpdate}
-        getTextFromInput={getTextFromArea}
-      />
+      <div className="min-w-[280px]">
+        <SidebarTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          images={images}
+          selectedImage={selectedImage}
+          handleImageClick={handleImageClick}
+          handleImageFocus={handleImageFocus}
+          handleFiles={handleFiles}
+          fileInputRef={fileInputRef}
+          currentPageTemplate={currentPageTemplate}
+          selectedInput={selectedInput}
+          handleInputClick={handleInputClick}
+          handleInputUpdate={handleInputUpdate}
+          getTextFromInput={getTextFromArea}
+        />
+      </div>
 
       {/* Main canvas area */}
       <div className="flex flex-1 flex-col">
         <div className="flex flex-1 items-center justify-center p-4">
           {/* Toolbar */}
           <CanvasToolbar
-            focusedObjects={focusedObjects}
-            handleRotateClick={handleRotateClick}
-            handleTrashClick={handleTrashClick}
+            focusedObject={focusedObject}
+            onRotate={handleRotateClick}
+            onDelete={handleTrashClick}
+            onReset={handleResetClick}
           />
           <MainCanvas
             canvasRef={canvasRef}

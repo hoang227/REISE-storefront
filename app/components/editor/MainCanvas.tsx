@@ -69,7 +69,7 @@ export function MainCanvas({
       tabIndex={0}
       className="cursor-pointer bg-white shadow-[0_0_15px_rgba(0,0,0,0.1)] focus:outline-none"
     >
-      <canvas ref={canvasRef} className="h-full w-full" />
+      <canvas ref={canvasRef} className="h-full w-full" tabIndex={0} />
     </div>
   )
 }

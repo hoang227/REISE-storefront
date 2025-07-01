@@ -1,4 +1,5 @@
 import {X} from 'lucide-react'
+import {useEffect, useRef} from 'react'
 
 interface UnsavedChangesModalProps {
   isOpen: boolean
@@ -11,26 +12,43 @@ export function UnsavedChangesModal({
   onConfirm,
   onCancel,
 }: UnsavedChangesModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.focus()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen, onCancel])
+
   if (!isOpen) return null
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     // Prevent closing by clicking backdrop
-    e.stopPropagation()
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Prevent closing with Escape key
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      e.stopPropagation()
-    }
+    e.preventDefault()
   }
 
   return (
     <div
+      ref={modalRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={handleBackdropClick}
-      onKeyDown={handleKeyDown}
+      tabIndex={-1}
+      role="dialog"
+      aria-modal="true"
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     >
       <div className="mx-4 w-full max-w-md rounded-lg border border-red-200 bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
