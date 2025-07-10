@@ -1,5 +1,10 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "hydrogen"
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/dist/server/index.js"
+    }
+  ]
 } 
