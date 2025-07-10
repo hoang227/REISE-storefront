@@ -1,5 +1,6 @@
 interface PageButtonProps {
-  page: any
+  page: string
+  totalPages: number
   index: number
   isCurrentPage: boolean
   thumbnail: string | null
@@ -9,6 +10,7 @@ interface PageButtonProps {
 
 export function PageButton({
   page,
+  totalPages,
   index,
   isCurrentPage,
   thumbnail,
@@ -35,23 +37,16 @@ export function PageButton({
     scrollToPage(index)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      handleClick()
-    }
-  }
-
   const imageSrc = thumbnail
-  const pageLabel = getPageLabel(index, page.totalPages || 0, page.pageNumber)
+  const pageLabel = getPageLabel(index, totalPages || 0, index)
 
   return (
     <div className="flex flex-col items-center justify-center space-y-2 font-sans">
       <button
         className={`${
-          isCurrentPage ? 'rounded border-[3px] border-brand-accent' : ''
-        } min-w-[105px] bg-gray-100 p-2 transition-all hover:bg-gray-200`}
+          isCurrentPage ? 'rounded border-[2px] border-brand-accent' : ''
+        } min-w-[100px] rounded bg-gray-100 p-2 transition-all hover:bg-gray-200`}
         onClick={handleClick}
-        onKeyDown={handleKeyDown}
         title={pageLabel}
       >
         {imageSrc && (

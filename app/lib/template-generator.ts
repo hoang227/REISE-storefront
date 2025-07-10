@@ -15,7 +15,63 @@ export interface VariantData {
   productHandle: string
 }
 
-// Template generator class
+// --- Constants for default styles ---
+const DEFAULT_TEXTAREA_STYLE = {
+  fontFamily: 'Poppins',
+  fill: '#333333',
+  textAlign: 'center' as const,
+  isEditable: true,
+}
+
+const DEFAULT_IMAGE_SPOT = {
+  aspectRatio: 1.33,
+  placeholderText: 'Add Image',
+  isRequired: false,
+}
+
+// --- Helper functions ---
+function createTextArea(
+  id: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  fontSize: number,
+  overrides: Partial<TextArea> = {}
+): TextArea {
+  return {
+    id,
+    x,
+    y,
+    width,
+    height,
+    fontSize,
+    ...DEFAULT_TEXTAREA_STYLE,
+    ...overrides,
+    defaultText: overrides.defaultText ?? '',
+  }
+}
+
+function createImageSpot(
+  id: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  overrides: Partial<ImageSpot> = {}
+): ImageSpot {
+  return {
+    id,
+    x,
+    y,
+    width,
+    height,
+    ...DEFAULT_IMAGE_SPOT,
+    ...overrides,
+  }
+}
+
+// --- Template generator class ---
 export class TemplateGenerator {
   private variant: VariantData
   private placeholderText: string
@@ -27,12 +83,8 @@ export class TemplateGenerator {
 
   // Generate a complete template based on the variant
   generateTemplate(): PhotobookTemplate {
-    console.log('🎨 Starting template generation for variant:', this.variant)
-
     const templateId = this.generateTemplateId()
     const numPages = this.getNumberOfPages()
-
-    console.log(`📋 Template details: ID=${templateId}, Pages=${numPages}`)
 
     const template: PhotobookTemplate = {
       id: templateId,
@@ -44,28 +96,19 @@ export class TemplateGenerator {
       pages: this.generatePageTemplates(numPages),
     }
 
-    // Validate template structure
-    console.log(`📊 Template validation:`)
-    console.log(`   - Cover template: ${template.coverTemplate.name}`)
-    console.log(`   - Back cover template: ${template.backCoverTemplate.name}`)
-    console.log(`   - Page templates: ${template.pages.length} pages`)
-
     // Ensure we have the correct number of pages
     if (template.pages.length !== numPages) {
-      console.warn(
-        `⚠️  Page count mismatch: Expected ${numPages}, got ${template.pages.length}`
-      )
+      // Page count mismatch
     }
 
     // Ensure every page has content
     template.pages.forEach((page, index) => {
       const pageNum = index + 1
       if (page.imageSpots.length === 0 && page.textAreas.length === 0) {
-        console.warn(`⚠️  Page ${pageNum} has no content (no images or text)`)
+        // Page has no content
       }
     })
 
-    console.log(`✅ Template generation complete: ${template.name}`)
     return template
   }
 
@@ -128,14 +171,12 @@ export class TemplateGenerator {
       const pageMatch = pageOption.value.match(/\d+/)
       if (pageMatch) {
         const pages = parseInt(pageMatch[0])
-        console.log(`📄 Found page count in variant: ${pages}`)
         return pages
       }
     }
 
     // Default page count
     const defaultPages = 12
-    console.log(`📄 Using default page count: ${defaultPages}`)
     return defaultPages
   }
 
@@ -146,9 +187,9 @@ export class TemplateGenerator {
       name: 'Cover Template',
       description: 'Cover template for photobook',
       category: 'cover',
-      imageSpots: this.generateCoverImageSpots(),
+      imageSpots: [],
       textAreas: this.generateCoverTextAreas(),
-      backgroundElements: this.generateCoverBackgroundElements(),
+      backgroundElements: [],
       backgroundColor: '#ffffff',
     }
   }
@@ -160,7 +201,7 @@ export class TemplateGenerator {
       name: 'Back Cover Template',
       description: 'Back cover template for photobook',
       category: 'cover',
-      imageSpots: this.generateBackCoverImageSpots(),
+      imageSpots: [],
       textAreas: this.generateBackCoverTextAreas(),
       backgroundElements: [],
       backgroundColor: '#ffffff',
@@ -171,23 +212,17 @@ export class TemplateGenerator {
   private generatePageTemplates(numPages: number): PageTemplate[] {
     const pages: PageTemplate[] = []
 
-    console.log(`📚 Generating ${numPages} page templates`)
-
     for (let i = 1; i <= numPages; i++) {
       const pageTemplate = {
         id: `page-${this.generateTemplateId()}-${i}`,
         name: `Page ${i}`,
         description: `Page ${i} template for photobook`,
         category: 'spread' as const,
-        imageSpots: this.generatePageImageSpots(i),
+        imageSpots: [],
         textAreas: this.generatePageTextAreas(i),
         backgroundElements: [],
         backgroundColor: '#ffffff',
       }
-
-      console.log(
-        `📄 Generated page ${i}: ${pageTemplate.name} with ${pageTemplate.imageSpots.length} image spots and ${pageTemplate.textAreas.length} text areas`
-      )
 
       pages.push(pageTemplate)
     }
@@ -216,50 +251,13 @@ export class TemplateGenerator {
     const designName = this.getDesignName()
 
     return [
-      {
-        id: 'cover-title',
-        x: 375,
-        y: 80,
-        width: 400,
-        height: 60,
-        fontSize: 36,
-        fontFamily: 'Arial',
-        fill: '#333333',
-        textAlign: 'center',
+      createTextArea('cover-title', 375, 80, 400, 60, 36, {
         defaultText: designName,
-        isEditable: true,
-      },
-      {
-        id: 'cover-subtitle',
-        x: 375,
-        y: 500,
-        width: 400,
-        height: 40,
-        fontSize: 20,
-        fontFamily: 'Arial',
-        fill: '#666666',
-        textAlign: 'center',
+      }),
+      createTextArea('cover-subtitle', 375, 500, 400, 40, 20, {
         defaultText: 'A beautiful collection of memories',
-        isEditable: true,
-      },
-    ]
-  }
-
-  // Generate cover background elements
-  private generateCoverBackgroundElements(): BackgroundElement[] {
-    return [
-      {
-        id: 'cover-border',
-        type: 'rectangle',
-        x: 0,
-        y: 0,
-        width: 750,
-        height: 550,
-        fill: 'transparent',
-        stroke: '#e5e7eb',
-        strokeWidth: 2,
-        locked: true,
-      },
+        fill: '#666666',
+      }),
     ]
   }
 
@@ -282,19 +280,9 @@ export class TemplateGenerator {
   // Generate back cover text areas
   private generateBackCoverTextAreas(): TextArea[] {
     return [
-      {
-        id: 'back-cover-text',
-        x: 375,
-        y: 450,
-        width: 400,
-        height: 80,
-        fontSize: 16,
-        fontFamily: 'Arial',
-        fill: '#333333',
-        textAlign: 'center',
+      createTextArea('back-cover-text', 375, 450, 400, 80, 16, {
         defaultText: 'Back cover placeholder text',
-        isEditable: true,
-      },
+      }),
     ]
   }
 
@@ -347,32 +335,13 @@ export class TemplateGenerator {
   // Generate page text areas
   private generatePageTextAreas(pageNum: number): TextArea[] {
     return [
-      {
-        id: `page${pageNum}-title`,
-        x: 375,
-        y: 50,
-        width: 400,
-        height: 40,
-        fontSize: 24,
-        fontFamily: 'Arial',
-        fill: '#333333',
-        textAlign: 'center',
+      createTextArea(`page${pageNum}-title`, 375, 50, 400, 40, 24, {
         defaultText: 'Page Title',
-        isEditable: true,
-      },
-      {
-        id: `page${pageNum}-description`,
-        x: 375,
-        y: 500,
-        width: 400,
-        height: 60,
-        fontSize: 16,
-        fontFamily: 'Arial',
-        fill: '#666666',
-        textAlign: 'center',
+      }),
+      createTextArea(`page${pageNum}-description`, 375, 500, 400, 60, 16, {
         defaultText: 'Add your story here...',
-        isEditable: true,
-      },
+        fill: '#666666',
+      }),
     ]
   }
 

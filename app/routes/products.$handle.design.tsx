@@ -10,7 +10,7 @@ import {cn, getMaxPagesFromVariant} from '~/lib/utils'
 import {ProductFragment} from 'storefrontapi.generated'
 import PhotobookEditor from '~/components/editor/PhotobookEditor'
 import {UnsavedChangesModal} from '~/components/UnsavedChangesModal'
-import {getTemplateForVariant} from '~/lib/templates'
+import {generateTemplateFromVariant} from '~/lib/template-generator'
 
 export const meta: MetaFunction = () => {
   return [
@@ -37,9 +37,13 @@ export default function ProductDesign() {
   )
 
   // Determine template based on selected variant
-  const selectedTemplate = getTemplateForVariant(
-    selectedVariant.selectedOptions
-  )
+  const selectedTemplate = generateTemplateFromVariant({
+    id: selectedVariant.id,
+    title: selectedVariant.title,
+    selectedOptions: selectedVariant.selectedOptions,
+    productTitle: product.title,
+    productHandle: product.handle,
+  })
 
   // Search params
   const searchParams = new URLSearchParams()

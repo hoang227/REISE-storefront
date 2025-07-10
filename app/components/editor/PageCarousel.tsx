@@ -3,7 +3,7 @@ import {ChevronLeft, ChevronRight} from 'lucide-react'
 import {PageButton} from './PageButton'
 
 interface PageCarouselProps {
-  pages: any[]
+  pages: string[]
   currentPageIndex: number
   thumbnails: (string | null)[]
   switchToPage: (pageIndex: number) => void
@@ -38,7 +38,7 @@ export function PageCarousel({
   const scrollToPage = (pageIndex: number) => {
     if (carouselRef.current) {
       // Calculate the position of the page in the carousel
-      const pageWidth = 144 // min-w-32 (128px) + space-x-4 (16px) = 144px
+      const pageWidth = 116 // min-w-32 (128px) + space-x-4 (16px) = 144px
       const scrollPosition = pageIndex * pageWidth
 
       carouselRef.current.scrollTo({
@@ -75,12 +75,12 @@ export function PageCarousel({
   return (
     <div>
       {/* Page Navigation */}
-      <div className="flex items-center justify-center space-x-2 border-y bg-white text-black">
-        <div className="flex min-w-36 justify-end border-l border-gray-300 px-4 py-2">
+      <div className="flex items-center justify-center border-y bg-white text-black">
+        <div className="flex min-w-36 justify-end border-l border-gray-300">
           <button
             onClick={handlePreviousPage}
             disabled={currentPageIndex === 0}
-            className="flex items-center disabled:cursor-not-allowed disabled:opacity-30"
+            className="flex items-center px-4 py-2 disabled:cursor-not-allowed disabled:opacity-30"
             title="Previous Page"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -103,11 +103,11 @@ export function PageCarousel({
           </button>
         </div>
 
-        <div className="flex min-w-36 justify-start border-r border-gray-300 px-4 py-2">
+        <div className="flex min-w-36 justify-start border-r border-gray-300">
           <button
             onClick={handleNextPage}
             disabled={currentPageIndex === pages.length - 1}
-            className="flex items-center justify-center rounded-md bg-white/20 transition-opacity hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center justify-center rounded-md bg-white/20 px-4 py-2 transition-opacity hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
             title="Next Page"
           >
             <div className="font-sans text-sm">Next page</div>
@@ -117,15 +117,16 @@ export function PageCarousel({
       </div>
 
       {/* Page Carousel */}
-      <div className="flex justify-center">
+      <div className="flex justify-center bg-gray-100">
         <div
           ref={carouselRef}
           className="m-4 flex max-w-5xl space-x-4 overflow-x-auto [scrollbar-width:none]"
         >
           {pages.map((page, index) => (
             <PageButton
-              key={page.id}
+              key={`page-${page}`}
               page={page}
+              totalPages={pages.length}
               index={index}
               isCurrentPage={index === currentPageIndex}
               thumbnail={thumbnails[index]}

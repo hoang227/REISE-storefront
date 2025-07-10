@@ -1,240 +1,133 @@
-import {useRef, useEffect, useState} from 'react'
-import {Canvas, Image as FabricImage, Text} from 'fabric/es'
+import {useCallback} from 'react'
 import {UploadedImage} from '~/contexts/ImageContext'
+import {useCanvas} from './canvas/useCanvas'
+import {useCanvasSelection} from './canvas/useCanvasSelection'
+import {useCanvasRotation} from './canvas/useCanvasRotation'
+import {useCanvasKeyboard} from './canvas/useCanvasKeyboard'
+import {useCanvasObjects} from './canvas/useCanvasObjects'
 
 export function useCanvasManagement(
   handleImageUnfocus: () => void,
   onCanvasChange: () => void,
   saveCurrentPage?: () => void
 ) {
-  const [focusedObjects, setFocusedObjects] = useState<FabricImage[]>([])
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const canvasInstanceRef = useRef<Canvas | null>(null)
+  // Core canvas functionality
+  const {canvasRef, canvasInstanceRef, resetCanvas} = useCanvas(
+    onCanvasChange,
+    saveCurrentPage
+  )
 
-  // Create canvas
-  useEffect(() => {
-    if (!canvasRef.current) return
+  // Object selection and focus management
+  const {focusedObject, setFocusedObject, clearSelection} =
+    useCanvasSelection(canvasInstanceRef)
 
-    const canvas = new Canvas(canvasRef.current, {
-      height: 550,
-      width: 750,
-      selection: true,
-    })
+  // Rotation functionality
+  const {handleRotateClick, handleResetClick, handlePreciseRotate} =
+    useCanvasRotation(canvasInstanceRef)
 
-    canvasInstanceRef.current = canvas
+  // Object management (add/delete images and text)
+  const {handleAddImageToCanvas, handleAddTextToCanvas, handleDeleteObject} =
+    useCanvasObjects(canvasInstanceRef)
 
-    // Add event listeners for selection
-    canvas.on('selection:created', (e) => {
-      setFocusedObjects(e.selected as FabricImage[])
-    })
-
-    canvas.on('selection:updated', (e) => {
-      if (e.e?.shiftKey) {
-        setFocusedObjects((prevObjects) => [
-          ...prevObjects,
-          ...(e.selected as FabricImage[]),
-        ])
-      } else {
-        setFocusedObjects(e.selected as FabricImage[])
-      }
-    })
-
-    canvas.on('selection:cleared', () => {
-      setFocusedObjects([])
-    })
-
-    // Add event listeners for canvas changes
-    canvas.on('object:added', () => {
-      const hasContent = canvas.getObjects().length > 0
-      onCanvasChange()
-      // Auto-save current page
-      if (saveCurrentPage) {
-        setTimeout(() => saveCurrentPage(), 100)
-      }
-    })
-
-    canvas.on('object:removed', () => {
-      const hasContent = canvas.getObjects().length > 0
-      onCanvasChange()
-      // Auto-save current page
-      if (saveCurrentPage) {
-        setTimeout(() => saveCurrentPage(), 100)
-      }
-    })
-
-    canvas.on('object:modified', () => {
-      const hasContent = canvas.getObjects().length > 0
-      onCanvasChange()
-      // Auto-save current page
-      if (saveCurrentPage) {
-        setTimeout(() => saveCurrentPage(), 100)
-      }
-    })
-
-    return () => {
-      canvas.dispose()
-    }
-  }, [onCanvasChange, saveCurrentPage])
+  // Keyboard event handling
+  useCanvasKeyboard(focusedObject, handleDeleteObject, clearSelection)
 
   // Reset canvas state when images change
-  useEffect(() => {
-    if (canvasInstanceRef.current) {
-      // Clear all objects from canvas
-      canvasInstanceRef.current.clear()
-      canvasInstanceRef.current.renderAll()
-      setFocusedObjects([])
-      // Notify parent that canvas is now empty
-      onCanvasChange()
-    }
-  }, [onCanvasChange])
+  const handleCanvasReset = useCallback(() => {
+    resetCanvas()
+    setFocusedObject(null)
+  }, [resetCanvas, setFocusedObject])
 
   // Handle trash click
-  const handleTrashClick = () => {
-    if (focusedObjects.length > 0 && canvasInstanceRef.current) {
-      focusedObjects.forEach((obj) => {
-        canvasInstanceRef.current?.remove(obj)
-      })
-      canvasInstanceRef.current.discardActiveObject()
-      canvasInstanceRef.current.renderAll()
-      setFocusedObjects([])
-    }
-  }
-
-  // Handle rotate click
-  const handleRotateClick = () => {
-    if (focusedObjects.length > 0 && canvasInstanceRef.current) {
-      focusedObjects.forEach((obj) => {
-        obj.set({originX: 'center', originY: 'center'})
-        obj.angle = ((obj.angle || 0) + 90) % 360
-        obj.setCoords()
-      })
-      canvasInstanceRef.current.renderAll()
-    }
-  }
+  const handleTrashClick = useCallback(() => {
+    handleDeleteObject(focusedObject)
+    setFocusedObject(null)
+  }, [focusedObject, handleDeleteObject, setFocusedObject])
 
   // Handle drag over
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
-  }
+  }, [])
 
   // Handle click to add image
-  const handleClickToAddImage = (
-    e: React.MouseEvent<HTMLDivElement>,
-    selectedImage: UploadedImage | null
-  ) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleClickToAddImage = useCallback(
+    (
+      e: React.MouseEvent<HTMLDivElement>,
+      selectedImage: UploadedImage | null
+    ) => {
+      e.preventDefault()
+      e.stopPropagation()
 
-    if (!selectedImage) return
+      if (!selectedImage) return
 
-    const rect = canvasRef.current!.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const imagePreview = selectedImage.preview
+      const rect = canvasRef.current!.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      const imagePreview = selectedImage.preview
 
-    handleImageUnfocus()
-    handleAddImageToCanvas({imagePreview, x, y})
-  }
+      handleImageUnfocus()
+      handleAddImageToCanvas({imagePreview, x, y})
+    },
+    [canvasRef, handleImageUnfocus, handleAddImageToCanvas]
+  )
 
   // Handle drop
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
 
-    if (!e.dataTransfer) return
+      if (!e.dataTransfer) return
 
-    const rect = canvasRef.current!.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const imagePreview = e.dataTransfer.getData('imagePreview')
+      const rect = canvasRef.current!.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      const imagePreview = e.dataTransfer.getData('imagePreview')
 
-    handleImageUnfocus()
-    handleAddImageToCanvas({imagePreview, x, y})
-  }
+      handleImageUnfocus()
+      handleAddImageToCanvas({imagePreview, x, y})
+    },
+    [canvasRef, handleImageUnfocus, handleAddImageToCanvas]
+  )
 
-  // Handle add image to canvas
-  const handleAddImageToCanvas = ({
-    imagePreview,
-    x,
-    y,
-  }: {
-    imagePreview: string
-    x: number
-    y: number
-  }) => {
-    if (imagePreview && canvasInstanceRef.current) {
-      const img = new window.Image()
-      img.crossOrigin = 'anonymous'
-      img.src = imagePreview
+  // Wrapper functions for rotation handlers
+  const handleRotate = useCallback(() => {
+    handleRotateClick(focusedObject)
+  }, [focusedObject, handleRotateClick])
 
-      img.onload = () => {
-        const fabricImage = new FabricImage(img, {
-          left: x,
-          top: y,
-          scaleX: 0.25,
-          scaleY: 0.25,
-          selectable: true,
-          originX: 'center',
-          originY: 'center',
-        })
+  const handleReset = useCallback(() => {
+    handleResetClick(focusedObject)
+  }, [focusedObject, handleResetClick])
 
-        canvasInstanceRef.current?.add(fabricImage)
-        canvasInstanceRef.current?.renderAll()
-      }
-    }
-  }
-
-  // Handle add text to canvas
-  const handleAddTextToCanvas = ({
-    text,
-    x,
-    y,
-    fontSize = 48,
-    fontFamily = 'Arial',
-    fill = '#000000',
-  }: {
-    text: string
-    x: number
-    y: number
-    fontSize?: number
-    fontFamily?: string
-    fill?: string
-  }) => {
-    if (canvasInstanceRef.current) {
-      const fabricText = new Text(text, {
-        left: x,
-        top: y,
-        fontSize,
-        fontFamily,
-        fill,
-        selectable: false,
-        editable: false,
-        lockMovementX: true,
-        lockMovementY: true,
-        lockRotation: true,
-        lockScalingX: true,
-        lockScalingY: true,
-        originX: 'center',
-        originY: 'center',
-      })
-
-      canvasInstanceRef.current.add(fabricText)
-      canvasInstanceRef.current.renderAll()
-    }
-  }
+  const handlePreciseRotateWrapper = useCallback(
+    (snapIncrement: number = 15) => {
+      handlePreciseRotate(focusedObject, snapIncrement)
+    },
+    [focusedObject, handlePreciseRotate]
+  )
 
   return {
+    // Canvas refs
     canvasRef,
     canvasInstanceRef,
-    focusedObjects,
-    setFocusedObjects,
+
+    // State
+    focusedObject,
+    setFocusedObject,
+
+    // Event handlers
     handleTrashClick,
-    handleRotateClick,
+    handleRotateClick: handleRotate,
+    handleResetClick: handleReset,
+    handlePreciseRotate: handlePreciseRotateWrapper,
     handleDragOver,
     handleClickToAddImage,
     handleDrop,
     handleAddImageToCanvas,
     handleAddTextToCanvas,
+
+    // Utility functions
+    resetCanvas: handleCanvasReset,
   }
 }
